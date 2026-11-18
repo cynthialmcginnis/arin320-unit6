@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Save the Robot: AI Term Hangman, Units 0 to 6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--bg:#0f1622;--panel:#18222f;--panel2:#202c3b;--ink:#eef2f7;--muted:#9fb0c3;--line:#2e3d50;--accent:#5fb6ff;--good:#5ad08f;--bad:#ff7a6b;--amber:#ffbe55;--violet:#b19cff}
+*{box-sizing:border-box}
+html{font-size:16px}
+html.big{font-size:22px}
+html.big body{font-size:24px}
+html.big .wrap{max-width:1800px}
+html.big #robot{height:600px}
+html.big .clue{font-size:1.4rem}
+html.big .lt{width:clamp(36px,3.6vw,64px);height:clamp(52px,5vw,80px);font-size:clamp(1.8rem,3vw,3rem)}
+html.big .team .s{font-size:2.6rem}
+html,body{margin:0;min-height:100%}
+body{background:radial-gradient(1000px 600px at 20% 0%,#1b2a40,transparent 60%),var(--bg);color:var(--ink);font:18px/1.5 "Source Sans 3",system-ui,sans-serif}
+button{font:inherit;color:inherit}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;margin:0 0 .4em;line-height:1.15}
+.wrap{max-width:1280px;margin:0 auto;padding:16px 18px 30px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+header h1{font-size:clamp(1.5rem,3vw,2.2rem);flex:1;min-width:240px}
+header h1 span{color:var(--amber)}
+header h1 small{display:block;font-family:"Source Sans 3",sans-serif;font-size:.5em;font-weight:600;color:var(--violet);letter-spacing:.04em;margin-top:2px}
+.tb{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:6px 13px;cursor:pointer;font-size:.9rem}
+.tb:hover{border-color:var(--accent)}
+.main{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+#robot{height:440px;position:relative;padding:0;overflow:hidden}
+#robot canvas{display:block}
+#robot .nogl{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.pips{display:flex;gap:8px}.pip{width:22px;height:22px;border-radius:50%;background:var(--good)}.pip.off{background:var(--line)}
+#parts{position:absolute;left:14px;top:12px;font-family:"JetBrains Mono",monospace;font-size:.9rem;color:var(--muted)}
+#parts b{color:var(--amber)}
+.unit{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:.85rem;color:var(--violet);font-weight:700;letter-spacing:.03em}
+.clue{font-size:1.25rem;margin:10px 0 14px;min-height:3em}
+.clue b{color:var(--amber)}
+#word{display:flex;flex-wrap:wrap;gap:8px 18px;margin:8px 0 16px;justify-content:center}
+.wd{display:flex;gap:6px}
+.lt{width:clamp(28px,3.4vw,44px);height:clamp(40px,4.6vw,58px);border-bottom:4px solid var(--muted);display:flex;align-items:flex-end;justify-content:center;font-family:"JetBrains Mono",monospace;font-weight:700;font-size:clamp(1.3rem,2.6vw,2.1rem);padding-bottom:2px}
+.lt.sym{border-bottom-color:transparent;width:16px}
+.lt.show{border-bottom-color:var(--accent);animation:pop .35s}
+.lt.lost{color:var(--bad)}
+@keyframes pop{0%{transform:translateY(-14px);opacity:0}100%{transform:none;opacity:1}}
+#keys{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:6px;margin:6px 0 12px}
+.k{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:9px 0;cursor:pointer;font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.05rem}
+.k:hover:not(:disabled){border-color:var(--accent);background:#25364b}
+.k:disabled{cursor:default;opacity:.85}
+.k.hit{background:var(--good);color:#0b1a12;border-color:var(--good)}
+.k.miss{background:transparent;color:var(--line);border-color:var(--line);text-decoration:line-through}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{border:1px solid var(--accent);background:var(--accent);color:#08131f;border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:700}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+#teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.team{border:2px solid var(--line);border-radius:14px;padding:10px 14px;background:var(--panel2);transition:all .25s}
+.team .n{font-weight:700}
+.team .s{font-family:Fraunces,serif;font-size:2rem;line-height:1}
+.team.turn{border-color:var(--amber);box-shadow:0 0 0 4px rgba(255,190,85,.18);transform:translateY(-2px)}
+.team.turn .n::after{content:"  ← your turn";color:var(--amber);font-size:.85rem}
+#msg{min-height:1.6em;font-weight:600}
+.good{color:var(--good)}.bad{color:var(--bad)}.amb{color:var(--amber)}.muted{color:var(--muted)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.modal.show{display:flex}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:24px 28px;max-width:640px;width:100%;max-height:92vh;overflow:auto}
+.box h2{font-size:1.7rem}
+.term{font-family:"JetBrains Mono",monospace;font-size:clamp(1.4rem,4vw,2.2rem);color:var(--amber);font-weight:700;margin:6px 0 10px;word-break:break-word}
+input[type=text]{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 11px;width:100%}
+label.c{display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px dashed var(--line);cursor:pointer}
+label.c input{margin-top:5px;accent-color:var(--accent)}
+.tn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.help ol{padding-left:22px;margin:.3em 0}
+.help li{margin:4px 0}
+.clock{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.1rem;background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:5px 12px}
+.clock.warn{color:var(--amber);border-color:var(--amber)}
+.clock.out{color:var(--bad);border-color:var(--bad)}
+select{font:inherit;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:7px 11px;width:100%}
+.setgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.setgrid label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:.95rem}
+.cert{background:#fff;color:#1c2330;border-radius:14px;padding:22px 26px;border:6px double #b3650a}
+.cert h2{color:#1c2330;margin-bottom:.1em}
+.cert .who{font-family:Fraunces,serif;font-size:1.8rem;color:#1d5fa8;margin:.2em 0}
+.cert .big{font-family:Fraunces,serif;font-size:3rem;line-height:1;color:#b3650a}
+.cert .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.cert .stats div{background:#f4efe6;border-radius:10px;padding:8px 10px}
+.cert .stats b{display:block;font-size:1.5rem;font-family:Fraunces,serif}
+.cert .stats span{font-size:.85rem;color:#5b6372}
+.cert table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}
+.cert td,.cert th{border-bottom:1px solid #e3ddd0;padding:4px 6px;text-align:left}
+.cert th{color:#5b6372;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+.cert .stamp{font-family:"JetBrains Mono",monospace;font-size:.8rem;color:#5b6372;margin-top:10px}
+@media print{
+  body{background:#fff}
+  .wrap,.modal:not(#mOver){display:none!important}
+  #mOver{position:static;display:block!important;background:none;padding:0}
+  #mOver .box{max-height:none;overflow:visible;border:none;background:none;padding:0;max-width:none}
+  #mOver .noprint{display:none!important}
+  .cert{border-width:6px}
+}
+@media (max-width:900px){.main{grid-template-columns:1fr}#robot{height:320px}#keys{grid-template-columns:repeat(9,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header>
+  <h1>Save the <span>Robot</span>: AI Term Hangman<small>ARIN 320 · Key terms from Units 0 to 6</small></h1>
+  <span class="clock" id="clock" title="Time left">--:--</span>
+  <button class="tb" id="bHelp">How to play</button>
+  <button class="tb" id="bSet">New game</button>
+  <button class="tb" id="bBig" title="Big text for a classroom screen (B)">Big screen</button>
+  <button class="tb" id="bSound">Sound: on</button>
+ </header>
+ <div class="main">
+  <div class="card" id="robot"><div id="parts"></div><div class="nogl"><p class="muted">The 3D robot needs an internet connection. Parts left:</p><div class="pips" id="pips"></div></div></div>
+  <div class="card">
+   <div class="row" style="justify-content:space-between"><span class="unit" id="unit"></span><span class="muted" id="left"></span></div>
+   <div class="clue" id="clue"></div>
+   <div id="word"></div>
+   <div id="keys"></div>
+   <div class="row">
+    <button class="btn" id="bSolve">Solve the whole term</button>
+    <button class="btn ghost" id="bHint">Hint: show one letter (costs a part)</button>
+    <button class="btn ghost" id="bSkip">Skip this term</button>
+   </div>
+   <p id="msg"></p>
+   <div id="teams"></div>
+  </div>
+ </div>
+</div>
+
+<div class="modal" id="mEnd"><div class="box">
+ <h2 id="endTitle"></h2>
+ <div class="term" id="endTerm"></div>
+ <p class="unit" id="endUnit" style="display:inline-block"></p>
+ <p id="endDef" style="font-size:1.1rem"></p>
+ <p class="amb" id="endPts"></p>
+ <div class="row"><button class="btn" id="bNext">Next term</button><button class="btn ghost" id="bEndGame">End the game</button></div>
+</div></div>
+
+<div class="modal" id="mSolve"><div class="box">
+ <h2>Solve the whole term</h2>
+ <p class="muted">Type the full term. Spaces, hyphens, and apostrophes do not matter. A wrong answer costs the robot two parts and passes the turn.</p>
+ <input type="text" id="solveIn" autocomplete="off" aria-label="Your answer">
+ <div class="row" style="margin-top:12px"><button class="btn" id="solveGo">Check my answer</button><button class="btn ghost" id="solveX">Cancel</button></div>
+</div></div>
+
+<div class="modal" id="mSet"><div class="box">
+ <h2>Start a game</h2>
+ <p class="muted" style="margin:0 0 6px">Two players compete on one laptop and take turns. When the game ends, print or save the score sheet. Both players upload a copy.</p>
+ <h3 style="font-size:1.1rem;margin-top:10px">Players</h3>
+ <div class="tn"><input type="text" id="p1" placeholder="Player 1 first and last name" aria-label="Player 1 name"><input type="text" id="p2" placeholder="Player 2 first and last name" aria-label="Player 2 name"></div>
+ <div class="setgrid">
+  <label>Number of terms<select id="setCount"><option value="10">10 terms</option><option value="15">15 terms</option><option value="20">20 terms</option><option value="25">25 terms</option><option value="0">Every term</option></select></label>
+  <label>Time limit<select id="setMin"><option value="15">15 minutes</option><option value="20">20 minutes</option><option value="25">25 minutes</option><option value="30">30 minutes</option><option value="35">35 minutes</option><option value="0">No time limit</option></select></label>
+ </div>
+ <h3 style="font-size:1.1rem;margin-top:12px">Units to include</h3>
+ <p class="muted" style="margin:0">Terms are drawn evenly from the units you check.</p>
+ <div id="setUnits"></div>
+ <div class="row" style="margin-top:14px"><button class="btn" id="setGo">Start the game</button><button class="btn ghost" id="setX">Cancel</button></div>
+</div></div>
+
+<div class="modal" id="mOver"><div class="box" style="max-width:760px">
+ <div class="cert" id="cert"></div>
+ <p class="muted noprint" style="margin-top:12px">Print it or save it as a PDF, then upload it to the AI Lab Sprint dropbox on LEO. Both players upload a copy.</p>
+ <div class="row noprint"><button class="btn" id="bPrint">Print or save my score</button><button class="btn ghost" id="overNew">Play again</button></div>
+</div></div>
+
+<div class="modal" id="mHelp"><div class="box help">
+ <h2>How to play</h2>
+ <ol>
+  <li>Read the clue. It is the definition of a term from Units 0 to 6.</li>
+  <li>The player whose name is outlined in orange guesses one letter. Select it on the screen or type it on the keyboard.</li>
+  <li>A correct letter shows everywhere it appears in the term, and the same player guesses again.</li>
+  <li>A wrong letter knocks one part off the robot, and the turn passes to the other player.</li>
+  <li>The player who finishes the term scores 10 points plus 1 point for each part the robot still has.</li>
+  <li>If the robot loses all 7 parts, it powers down and nobody scores.</li>
+  <li>When a term ends, the player who did not score reads the definition out loud.</li>
+  <li>The game ends when you finish every term or the clock runs out. Then print or save your score.</li>
+ </ol>
+ <div class="row"><button class="btn" id="helpX">Close</button></div>
+</div></div>
+
+<script>
+/* ===== The term list. Add, remove, or edit terms here. u is the unit number. ===== */
+const UNITS = {0:'Unit 0: AI basics',1:'Unit 1: AI problem types and cases',2:'Unit 2: Ethics and law',3:'Unit 3: AI tools and the cloud',4:'Unit 4: Data',5:'Unit 5: Reading AI outputs',6:'Unit 6: Domain-specific AI and case studies'};
+const TERMS = [
+ {u:0,w:'ARTIFICIAL INTELLIGENCE',c:'Computer systems that do tasks that normally need human judgment, such as predicting, sorting, or recognizing images.'},
+ {u:0,w:'MACHINE LEARNING',c:'A way of building AI where the computer learns patterns from examples instead of following rules a person wrote.'},
+ {u:0,w:'DEEP LEARNING',c:'Machine learning that uses neural networks with many layers. It powers image recognition and chatbots.'},
+ {u:0,w:'NEURAL NETWORK',c:'A model made of layers of connected units that pass numbers forward and adjust as they learn.'},
+ {u:0,w:'GENERATIVE AI',c:'AI that creates new text, images, audio, or code from instructions.'},
+ {u:0,w:'LARGE LANGUAGE MODEL',c:'A model trained on huge amounts of text to predict the next word. It is the engine inside most chatbots.'},
+ {u:0,w:'PROMPT',c:'The instructions or question a person gives a GenAI tool.'},
+ {u:0,w:'ALGORITHM',c:'A set of step-by-step instructions a computer follows to solve a problem.'},
+ {u:0,w:'SUPERVISED LEARNING',c:'Learning from examples that already have the right answer attached.'},
+ {u:0,w:'UNSUPERVISED LEARNING',c:'Learning to find groups or patterns in examples that have no answers attached.'},
+ {u:0,w:'REINFORCEMENT LEARNING',c:'Learning by trial and error, with a reward for good actions and a penalty for bad ones.'},
+ {u:0,w:'NATURAL LANGUAGE PROCESSING',c:'The part of AI that reads, understands, or produces human language.'},
+ {u:0,w:'COMPUTER VISION',c:'The part of AI that reads images and video.'},
+ {u:1,w:'CLASSIFICATION',c:'A type of AI that puts each item into a category, such as spam or not spam.'},
+ {u:1,w:'REGRESSION',c:'A type of AI that predicts a number, such as a price or a delivery time.'},
+ {u:1,w:'CLUSTERING',c:'A type of AI that groups similar items together without being told the groups in advance.'},
+ {u:1,w:'ANOMALY DETECTION',c:'A type of AI that flags items that look unusual compared with normal, such as a strange login.'},
+ {u:1,w:'RECOMMENDATION',c:'A type of AI that suggests items a person is likely to want, such as the next video to watch.'},
+ {u:1,w:'DOMAIN EXPERT',c:'A person who knows the work deeply, such as a nurse, a mechanic, or a loan officer.'},
+ {u:1,w:'CRISP-DM',c:'A six-phase process for data projects: business understanding, data understanding, data preparation, modeling, evaluation, and deployment.'},
+ {u:1,w:'SPEECH RECOGNITION',c:'A type of AI that turns spoken words into text.'},
+ {u:1,w:'AI AGENT',c:'An AI system that plans and carries out steps toward a goal, such as booking travel, using tools along the way.'},
+ {u:2,w:'FAIRNESS',c:'Treating people and groups justly, so a system does not favor or harm some groups over others.'},
+ {u:2,w:'ALGORITHMIC BIAS',c:'Errors in an AI system that fall more heavily on some groups of people than on others.'},
+ {u:2,w:'TRANSPARENCY',c:'Being open about when AI is used, what data it uses, and how it is built.'},
+ {u:2,w:'EXPLAINABILITY',c:'Being able to say in plain words why an AI system gave a particular output.'},
+ {u:2,w:'ACCOUNTABILITY',c:'A named person or office answers for what an AI system does.'},
+ {u:2,w:'PRIVACY',c:'A person\'s right to control information about themselves.'},
+ {u:2,w:'DEEPFAKE',c:'Fake video, audio, or images made with AI to look like a real person.'},
+ {u:2,w:'INFORMED CONSENT',c:'Agreement a person gives after being told clearly what will happen to them or their data.'},
+ {u:2,w:'DATA GOVERNANCE',c:'The rules and roles that decide how an organization collects, stores, uses, and deletes data.'},
+ {u:2,w:'COPYRIGHT',c:'The legal right of creators to control copies of their work.'},
+ {u:3,w:'FALSE POSITIVE',c:'The system raises an alarm about something that is fine.'},
+ {u:3,w:'FALSE NEGATIVE',c:'The system misses something that is real.'},
+ {u:3,w:'CLOUD COMPUTING',c:'Renting computing power, storage, and services over the internet instead of owning the machines.'},
+ {u:3,w:'REKOGNITION',c:'Amazon\'s cloud service that finds objects, faces, and text in images.'},
+ {u:3,w:'OBJECT DETECTION',c:'AI that finds things in an image, labels each one, and marks where it is.'},
+ {u:3,w:'MULTIMODAL MODEL',c:'A GenAI model that works with more than one kind of input, such as text and images. Gemini is one.'},
+ {u:3,w:'OPTICAL CHARACTER RECOGNITION',c:'AI that reads printed or handwritten text in an image and turns it into typed text.'},
+ {u:3,w:'APPLICATION PROGRAMMING INTERFACE',c:'A doorway that lets one program send a request to another program and get a result back.'},
+ {u:3,w:'PILOT',c:'A small, short trial with real users, extra help, a success measure, and an end date.'},
+ {u:4,w:'DATASET',c:'A collection of records used to build or test a model.'},
+ {u:4,w:'RECORD',c:'One item in a dataset, usually one row in a table.'},
+ {u:4,w:'FEATURE',c:'One piece of information recorded about every item. Also called a variable or a column.'},
+ {u:4,w:'LABEL',c:'The answer the model is supposed to learn to predict, such as "showed up" or "missed."'},
+ {u:4,w:'PREPROCESSING',c:'Cleaning and reshaping data so a model can use it.'},
+ {u:4,w:'MISSING VALUE',c:'A blank where a piece of data should be.'},
+ {u:4,w:'OUTLIER',c:'A value far from the rest, such as an age of 250.'},
+ {u:4,w:'DUPLICATE',c:'The same record entered more than once.'},
+ {u:4,w:'CLASS IMBALANCE',c:'One answer is far more common than another in the data, such as 40 fraud cases in 5 million purchases.'},
+ {u:4,w:'CROSS-VALIDATION',c:'Splitting data into equal parts and testing on each part in turn, so every record is tested once.'},
+ {u:4,w:'TEST SET',c:'Data set aside and never shown to the model until the final check.'},
+ {u:4,w:'OUTPUT VARIABLE',c:'The one variable a model predicts.'},
+ {u:5,w:'THRESHOLD',c:'The score where a system or a person switches from one action to another.'},
+ {u:5,w:'CONFIDENCE SCORE',c:'A number attached to a system\'s answer. A high one is not proof the answer is right.'},
+ {u:5,w:'HALLUCINATION',c:'GenAI states something false in fluent, confident language.'},
+ {u:5,w:'AUTOMATION BIAS',c:'The habit of trusting an automated answer over your own judgment.'},
+ {u:5,w:'SENTIMENT ANALYSIS',c:'A type of AI that labels the tone of text as positive, negative, or neutral.'},
+ {u:5,w:'HUMAN IN THE LOOP',c:'The system recommends, and a person decides every case.'},
+ {u:5,w:'FALSE ALARM',c:'The system flags something that is fine. Another name for a false positive.'},
+ {u:5,w:'RELIABILITY',c:'Giving the right answer, consistently, on your kind of data.'},
+ {u:5,w:'RELEVANCE',c:'Whether an answer fits the decision you are actually making.'},
+ {u:5,w:'DRIFT',c:'Language or conditions change over time, so a system that passed a test last year can fail it this year.'},
+ {u:6,w:'DOMAIN',c:'The area of work where a system is used, with its own data, people, and rules. Healthcare and auto repair are two examples.'},
+ {u:6,w:'LAB TEST',c:'Scoring a model on saved data. Nobody uses it for real work yet.'},
+ {u:6,w:'DEPLOYMENT',c:'Everyday use of a tool. The extra help is gone, and decisions depend on it.'},
+ {u:6,w:'ACCURACY',c:'How often a system is right on the cases where it gives an answer. Cases with no answer are left out.'},
+ {u:6,w:'ANSWER RATE',c:'How often a system gives any answer at all. The eye clinic system answered 79 of 100 photos.'},
+ {u:6,w:'DOMAIN SHIFT',c:'The data in real use looks different from the data the model learned from, so its results drop.'},
+ {u:6,w:'SHORTCUT',c:'A pattern that raises a model\'s score but has nothing to do with the task, such as which hospital took the X-ray.'},
+ {u:6,w:'EXTERNAL VALIDATION',c:'Someone other than the builder tests the model on data the builder never saw.'},
+ {u:6,w:'TRAINING DATA',c:'The examples a model learns from. When real-use data looks different, results drop.'},
+ {u:6,w:'LOGISTIC REGRESSION',c:'A model that weighs each input and adds them into a score for a yes-or-no prediction, such as pneumonia or not.'},
+ {u:6,w:'AREA UNDER THE CURVE',c:'A score for how often a model ranks a sick patient above a healthy one. 0.5 is a coin flip and 1.0 is perfect. Shortened to AUC.'},
+ {u:6,w:'ALERT FATIGUE',c:'People stop paying attention to alerts because most of them are wrong.'},
+ {u:6,w:'PREDICTIVE MAINTENANCE',c:'Fixing equipment when sensor data shows it is wearing out, not on a fixed schedule.'},
+ {u:6,w:'FIT CHECK',c:'Five questions to ask before a tool moves somewhere new: data, users, workflow, stakes, and rules.'}
+];
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const PARTS=7, PART_NAMES=['antenna','left arm','right arm','left leg','right leg','chest light','head'];
+const ALL_UNITS=Object.keys(UNITS).map(Number);
+let cfg=store.get('hmCfg07',{p1:'',p2:'',units:ALL_UNITS,count:20,minutes:30});
+let teams=[], turn=0, deck=[], term=null, guessed=new Set(), lost=0, over=false, sound=store.get('hmSound',true);
+let results=[], total=0, endAt=0, startedAt=0, tick=null, finished=false;
+
+/* sound */
+let AC=null;
+function beep(f,d=.12,type='sine',v=.08,when=0){ if(!sound) return; try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); const t=AC.currentTime+when, o=AC.createOscillator(), g=AC.createGain(); o.type=type; o.frequency.setValueAtTime(f,t); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.0001,t+d); o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t+d+.02);}catch(e){} }
+const sHit=()=>{beep(660,.09,'triangle');beep(990,.12,'triangle',.07,.08)};
+const sMiss=()=>{beep(220,.18,'sawtooth',.05);beep(150,.25,'sawtooth',.05,.12)};
+const sWin=()=>[523,659,784,1047].forEach((f,i)=>beep(f,.18,'triangle',.08,i*.11));
+const sLose=()=>[392,330,262,196].forEach((f,i)=>beep(f,.25,'square',.04,i*.16));
+$('#bSound').textContent='Sound: '+(sound?'on':'off');
+function setBig(on){ document.documentElement.classList.toggle('big',on); $('#bBig').style.borderColor=on?'var(--amber)':''; $('#bBig').textContent=on?'Big screen: on':'Big screen'; store.set('hmBig',on); }
+setBig(store.get('hmBig',false)); $('#bBig').onclick=()=>setBig(!document.documentElement.classList.contains('big'));
+$('#bSound').onclick=()=>{ sound=!sound; store.set('hmSound',sound); $('#bSound').textContent='Sound: '+(sound?'on':'off'); };
+
+/* ---------- 3D robot ---------- */
+const R={ok:false};
+(function buildRobot(){
+  const el=$('#robot');
+  if(typeof THREE==='undefined'){ el.querySelector('.nogl').style.display='flex'; return; }
+  let renderer; try{ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true}); }catch(e){ el.querySelector('.nogl').style.display='flex'; return; }
+  const W=()=>el.clientWidth, H=()=>el.clientHeight;
+  renderer.setPixelRatio(Math.min(devicePixelRatio||1,2)); renderer.setSize(W(),H()); el.appendChild(renderer.domElement);
+  const scene=new THREE.Scene(), cam=new THREE.PerspectiveCamera(38,W()/H(),.1,100); cam.position.set(0,2.6,11.5); cam.lookAt(0,2.1,0);
+  scene.add(new THREE.AmbientLight(0xffffff,.55)); const dl=new THREE.DirectionalLight(0xffffff,.8); dl.position.set(4,8,6); scene.add(dl);
+  const rim=new THREE.PointLight(0x5fb6ff,.8,20); rim.position.set(-4,4,-3); scene.add(rim);
+  const floor=new THREE.Mesh(new THREE.CylinderGeometry(3.4,3.6,.2,48),new THREE.MeshStandardMaterial({color:0x223146,metalness:.2,roughness:.8})); floor.position.y=-.1; scene.add(floor);
+  const metal=c=>new THREE.MeshStandardMaterial({color:c,metalness:.45,roughness:.35});
+  const body=new THREE.Group(); scene.add(body);
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.7,1.1),metal(0x8fa9c7)); torso.position.y=2.45; body.add(torso);
+  const belly=new THREE.Mesh(new THREE.BoxGeometry(1.3,.35,1.15),metal(0x5d7594)); belly.position.y=1.7; body.add(belly);
+  const P=[];
+  const head=new THREE.Group(); head.position.y=3.85;
+  const skull=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.05,1.05),metal(0xa9c1dd)); head.add(skull);
+  const visor=new THREE.Mesh(new THREE.BoxGeometry(1.1,.42,.08),new THREE.MeshStandardMaterial({color:0x0b1420,metalness:.1,roughness:.2})); visor.position.set(0,.05,.54); head.add(visor);
+  const eyeM=new THREE.MeshStandardMaterial({color:0x5fb6ff,emissive:0x5fb6ff,emissiveIntensity:1});
+  const e1=new THREE.Mesh(new THREE.SphereGeometry(.11,16,12),eyeM); e1.position.set(-.27,.06,.6); head.add(e1);
+  const e2=e1.clone(); e2.position.x=.27; head.add(e2);
+  const mouth=new THREE.Mesh(new THREE.BoxGeometry(.5,.06,.05),eyeM); mouth.position.set(0,-.32,.53); head.add(mouth);
+  [-.75,.75].forEach(x=>{ const ear=new THREE.Mesh(new THREE.CylinderGeometry(.16,.16,.14,16),metal(0x5d7594)); ear.rotation.z=Math.PI/2; ear.position.set(x,0,0); head.add(ear); });
+  const ant=new THREE.Group(); ant.position.y=4.38;
+  const stalk=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.6,8),metal(0x5d7594)); stalk.position.y=.3; ant.add(stalk);
+  const bulb=new THREE.Mesh(new THREE.SphereGeometry(.14,16,12),new THREE.MeshStandardMaterial({color:0xffbe55,emissive:0xffbe55,emissiveIntensity:1})); bulb.position.y=.65; ant.add(bulb);
+  const arm=side=>{ const g=new THREE.Group(); g.position.set(side*1.15,3.05,0);
+    const up=new THREE.Mesh(new THREE.CylinderGeometry(.17,.17,.9,12),metal(0x5d7594)); up.position.y=-.45; g.add(up);
+    const fore=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.8,12),metal(0x8fa9c7)); fore.position.y=-1.15; g.add(fore);
+    const hand=new THREE.Mesh(new THREE.SphereGeometry(.22,14,10),metal(0xa9c1dd)); hand.position.y=-1.6; g.add(hand); g.rotation.z=side*.12; return g; };
+  const leg=side=>{ const g=new THREE.Group(); g.position.set(side*.48,1.5,0);
+    const l=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,1.2,12),metal(0x5d7594)); l.position.y=-.6; g.add(l);
+    const foot=new THREE.Mesh(new THREE.BoxGeometry(.5,.22,.75),metal(0x8fa9c7)); foot.position.set(0,-1.28,.12); g.add(foot); return g; };
+  const chest=new THREE.Mesh(new THREE.CylinderGeometry(.28,.28,.08,24),new THREE.MeshStandardMaterial({color:0x5ad08f,emissive:0x5ad08f,emissiveIntensity:1})); chest.rotation.x=Math.PI/2; chest.position.set(0,2.6,.57);
+  const al=arm(-1), ar=arm(1), ll=leg(-1), lr=leg(1);
+  [ant,al,ar,ll,lr,chest,head].forEach(p=>{ body.add(p); P.push({o:p,home:{p:p.position.clone(),r:p.rotation.clone()},fall:null}); });
+  R.ok=true; R.P=P; R.eyeM=eyeM; R.chest=chest; R.body=body; R.mode='idle'; R.t=0;
+  R.reset=()=>{ P.forEach(x=>{ x.fall=null; x.o.position.copy(x.home.p); x.o.rotation.copy(x.home.r); x.o.visible=true; }); eyeM.emissiveIntensity=1; eyeM.color.set(0x5fb6ff); eyeM.emissive.set(0x5fb6ff); R.mode='idle'; body.rotation.set(0,0,0); body.position.set(0,0,0); };
+  R.drop=i=>{ const x=P[i]; if(!x||x.fall) return; const side=(i%2?1:-1); x.fall={vx:side*(.03+Math.random()*.03),vy:.08,vz:.03+Math.random()*.03,spin:(Math.random()-.5)*.2,y0:.15+Math.random()*.1}; };
+  R.win=()=>{ R.mode='dance'; R.t=0; };
+  R.lose=()=>{ R.mode='dead'; eyeM.emissiveIntensity=0; eyeM.color.set(0x222222); };
+  (function loop(){ R.t+=1;
+    P.forEach(x=>{ if(!x.fall||x.fall.rest) return; const f=x.fall, o=x.o;
+      f.vy-=.012; o.position.x+=f.vx; o.position.y+=f.vy; o.position.z+=f.vz; o.rotation.x+=f.spin; o.rotation.z+=f.spin*.7;
+      const bb=new THREE.Box3().setFromObject(o); if(bb.min.y<=0.02){ o.position.y+=0.02-bb.min.y; f.rest=true; } });
+    if(R.mode==='idle'){ body.rotation.y=Math.sin(R.t*.012)*.25; if(!P[0].fall) P[0].o.rotation.z=Math.sin(R.t*.05)*.12; }
+    if(R.mode==='dance'){ body.position.y=Math.abs(Math.sin(R.t*.12))*.5; body.rotation.y+=.06; P.forEach((x,i)=>{ if(!x.fall&&(i===1||i===2)) x.o.rotation.z=(i===1?-1:1)*(.6+Math.sin(R.t*.25)*.5); }); }
+    if(R.mode==='dead'){ body.rotation.z+=(.35-body.rotation.z)*.04; }
+    const nowEye=R.mode==='dead'?0:(.7+.3*Math.sin(R.t*.08)); if(R.mode!=='dead') eyeM.emissiveIntensity=nowEye;
+    renderer.render(scene,cam); requestAnimationFrame(loop); })();
+  new ResizeObserver(()=>{ renderer.setSize(W(),H()); cam.aspect=W()/H(); cam.updateProjectionMatrix(); }).observe(el);
+})();
+function drawPips(){ $('#pips').innerHTML=Array.from({length:PARTS},(_,i)=>`<div class="pip${i<lost?' off':''}"></div>`).join(''); $('#parts').innerHTML=`Robot parts left: <b>${PARTS-lost}</b> of ${PARTS}`; }
+
+/* ---------- game ---------- */
+const norm=s=>s.toUpperCase().replace(/[^A-Z]/g,'');
+function newDeck(){ const by={}; cfg.units.forEach(u=>by[u]=TERMS.filter(t=>t.u===u).sort(()=>Math.random()-.5));
+  const pool=[]; let more=true; while(more){ more=false; cfg.units.forEach(u=>{ if(by[u].length){ pool.push(by[u].pop()); more=true; } }); }
+  const n=cfg.count>0?Math.min(cfg.count,pool.length):pool.length; deck=pool.slice(0,n).sort(()=>Math.random()-.5); total=deck.length; }
+
+function fmtT(ms){ const t=Math.max(0,Math.round(ms/1000)); return String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0'); }
+function runClock(){ clearInterval(tick); const c=$('#clock');
+  if(!cfg.minutes){ c.textContent='No limit'; c.className='clock'; return; }
+  const upd=()=>{ const left=endAt-Date.now(); c.textContent=fmtT(left); c.className='clock'+(left<=0?' out':left<=5*60000?' warn':'');
+    if(left<=0&&!finished){ clearInterval(tick); timeUp(); } };
+  upd(); tick=setInterval(upd,500); }
+function timeUp(){ if(term&&!over){ results.push({t:term,r:'Time ran out',p:0}); over=true; drawAllLight(); }
+  $$('.modal').forEach(m=>m.classList.remove('show')); say('Time is up.','bad'); setTimeout(gameOver,600); }
+function startGame(){ teams=[{n:cfg.p1,s:0,w:0},{n:cfg.p2,s:0,w:0}]; turn=Math.random()<.5?0:1; results=[]; finished=false; newDeck();
+  startedAt=Date.now(); endAt=startedAt+cfg.minutes*60000; runClock(); nextTerm(); }
+function nextTerm(){ $('#mEnd').classList.remove('show');
+  if(!deck.length){ gameOver(); return; }
+  term=deck.pop(); guessed=new Set(); lost=0; over=false; if(R.ok) R.reset(); drawAll(); say(`${teams[turn].n}, choose a letter.`); }
+function drawAll(){
+  $('#unit').textContent=UNITS[term.u]; $('#clue').innerHTML=`<b>Clue:</b> ${term.c}`;
+  $('#left').textContent=`Term ${total-deck.length} of ${total}`;
+  $('#word').innerHTML=term.w.split(' ').map(wd=>`<div class="wd">${[...wd].map(ch=>/[A-Z]/.test(ch)?`<div class="lt${guessed.has(ch)?' show':''}">${guessed.has(ch)?ch:''}</div>`:`<div class="lt sym">${ch}</div>`).join('')}</div>`).join('');
+  $('#keys').innerHTML=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].map(L=>{ const g=guessed.has(L), hit=term.w.includes(L); return `<button class="k${g?(hit?' hit':' miss'):''}" data-l="${L}" ${g||over?'disabled':''}>${L}</button>`; }).join('');
+  $$('#keys .k').forEach(b=>b.onclick=()=>guess(b.dataset.l));
+  $('#teams').innerHTML=teams.map((t,i)=>`<div class="team${i===turn&&!over?' turn':''}"><div class="n">${t.n}</div><div class="s">${t.s} <span style="font-size:.9rem;font-family:'Source Sans 3'" class="muted">points</span></div></div>`).join('');
+  $('#bSolve').disabled=over; $('#bHint').disabled=over||lost>=PARTS-1; $('#bSkip').disabled=over;
+  drawPips();
+}
+const say=(h,c='')=>{ $('#msg').className=c; $('#msg').innerHTML=h; };
+const solved=()=>[...norm(term.w)].every(ch=>guessed.has(ch));
+const pass=()=>{ turn=(turn+1)%teams.length; };
+function loseParts(n){ for(let k=0;k<n&&lost<PARTS;k++){ if(R.ok) R.drop(lost); lost++; } }
+function guess(L){ if(over||guessed.has(L)) return; guessed.add(L);
+  if(term.w.includes(L)){ sHit(); const n=[...term.w].filter(c=>c===L).length;
+    if(solved()){ drawAll(); return win(); } say(`Yes. ${L} appears ${n===1?'once':n+' times'}. ${teams[turn].n}, choose again.`,'good'); }
+  else { sMiss(); loseParts(1); if(lost>=PARTS){ drawAll(); return lose(); } const was=teams[turn].n; pass(); say(`No ${L}. The robot lost its ${PART_NAMES[lost-1]}. ${was}'s turn ends. ${teams[turn].n}, choose a letter.`,'bad'); }
+  drawAll(); }
+function win(){ over=true; const pts=10+(PARTS-lost), who=teams[turn]; who.s+=pts; who.w++; results.push({t:term,r:'Solved by '+who.n,p:pts}); sWin(); if(R.ok) R.win(); drawAll();
+  setTimeout(()=>endCard('Robot saved!',`${who.n} scores ${pts} points: 10 for the term and ${PARTS-lost} for the parts left. ${teams[1-turn].n}, read the definition out loud.`),900); }
+function lose(){ over=true; sLose(); if(R.ok) R.lose();
+  $('#word').innerHTML=term.w.split(' ').map(wd=>`<div class="wd">${[...wd].map(ch=>/[A-Z]/.test(ch)?`<div class="lt show${guessed.has(ch)?'':' lost'}">${ch}</div>`:`<div class="lt sym">${ch}</div>`).join('')}</div>`).join('');
+  results.push({t:term,r:'Robot powered down',p:0}); pass(); drawAllLight(); setTimeout(()=>endCard('The robot powered down',`No points for this term. ${teams[turn].n} starts the next term.`),1300); }
+function drawAllLight(){ $$('#keys .k').forEach(b=>b.disabled=true); $('#bSolve').disabled=true; $('#bHint').disabled=true; $('#bSkip').disabled=true; }
+function endCard(title,pts){ $('#endTitle').textContent=title; $('#endTerm').textContent=term.w; $('#endUnit').textContent=UNITS[term.u]; $('#endDef').textContent=term.c; $('#endPts').textContent=pts;
+  $('#bNext').textContent=deck.length?'Next term':'See my final score'; if(!finished) $('#mEnd').classList.add('show'); }
+function gameOver(){ if(finished) return; finished=true; clearInterval(tick); $('#mEnd').classList.remove('show');
+  const solvedN=results.filter(x=>x.r.startsWith('Solved')).length, used=fmtT(Date.now()-startedAt), now=new Date();
+  const stamp=now.toLocaleString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'short'});
+  const rows=results.map((x,i)=>`<tr><td>${i+1}</td><td><b>${x.t.w}</b></td><td>${UNITS[x.t.u].split(':')[0]}</td><td>${x.r}</td><td>${x.p}</td></tr>`).join('');
+  const [A,B]=teams, lead=A.s===B.s?null:(A.s>B.s?A:B);
+  $('#cert').innerHTML=`<div style="font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:#b3650a;font-weight:700">ARIN 320 · Save the Robot · Units 0 to 6</div>
+    <h2>Final score</h2>
+    <div class="who">${lead?lead.n+' wins':'A tie'}</div>
+    <div class="stats" style="grid-template-columns:1fr 1fr">${teams.map(t=>`<div style="${t===lead?'outline:3px solid #b3650a':''}"><span>${t.n}</span><b>${t.s} points</b><span>${t.w} ${t.w===1?'term':'terms'} solved</span></div>`).join('')}</div>
+    <div class="stats"><div><b>${solvedN} of ${total}</b><span>terms solved</span></div><div><b>${results.length}</b><span>terms played</span></div><div><b>${used}</b><span>time played${cfg.minutes?' of '+cfg.minutes+':00':''}</span></div></div>
+    <table><tr><th>#</th><th>Term</th><th>Unit</th><th>Result</th><th>Points</th></tr>${rows||'<tr><td colspan="5">No terms played.</td></tr>'}</table>
+    <div class="stamp">Finished ${stamp}</div>`;
+  $('#mOver').classList.add('show'); sWin(); }
+$('#bNext').onclick=nextTerm;
+$('#bEndGame').onclick=()=>{ $('#mEnd').classList.remove('show'); gameOver(); };
+$('#bPrint').onclick=()=>{ try{ window.print(); }catch(e){} };
+$('#overNew').onclick=()=>{ $('#mOver').classList.remove('show'); openSet(); };
+$('#bSkip').onclick=()=>{ if(over) return; over=true; results.push({t:term,r:'Skipped',p:0}); pass(); drawAllLight(); endCard('Skipped',`No points for this term. ${teams[turn].n} starts the next term.`); };
+$('#bHint').onclick=()=>{ if(over) return; const hidden=[...new Set(norm(term.w))].filter(c=>!guessed.has(c)); if(!hidden.length) return;
+  const L=hidden[Math.floor(Math.random()*hidden.length)]; loseParts(1); guessed.add(L); sHit(); if(solved()){ drawAll(); return win(); } say(`Hint: ${L}. The robot gave up its ${PART_NAMES[lost-1]} for it. ${teams[turn].n} keeps the turn.`,'amb'); drawAll(); };
+$('#bSolve').onclick=()=>{ if(over) return; $('#solveIn').value=''; $('#mSolve').classList.add('show'); setTimeout(()=>$('#solveIn').focus(),50); };
+$('#solveX').onclick=()=>$('#mSolve').classList.remove('show');
+const trySolve=()=>{ const a=norm($('#solveIn').value); if(!a) return; $('#mSolve').classList.remove('show');
+  if(a===norm(term.w)){ [...a].forEach(c=>guessed.add(c)); drawAll(); win(); }
+  else { sMiss(); loseParts(2); if(lost>=PARTS){ drawAll(); return lose(); } const was=teams[turn].n; pass(); say(`Not the term. The robot lost two parts. ${was}'s turn ends. ${teams[turn].n}, choose a letter.`,'bad'); drawAll(); } };
+$('#solveGo').onclick=trySolve; $('#solveIn').addEventListener('keydown',e=>{ if(e.key==='Enter') trySolve(); });
+document.addEventListener('keydown',e=>{ if(document.activeElement&&/INPUT|SELECT/.test(document.activeElement.tagName)) return; if(!term) return; if($$('.modal.show').length){ if(e.key==='Enter'&&$('#mEnd').classList.contains('show')) nextTerm(); return; }
+  const L=e.key.toUpperCase(); if(/^[A-Z]$/.test(L)) guess(L); });
+
+/* settings and help */
+function openSet(){ $('#p1').value=cfg.p1||''; $('#p2').value=cfg.p2||''; $('#setCount').value=String(cfg.count); $('#setMin').value=String(cfg.minutes);
+  $('#setUnits').innerHTML=Object.keys(UNITS).map(u=>`<label class="c"><input type="checkbox" value="${u}" ${cfg.units.includes(+u)?'checked':''}> <span>${UNITS[u]} <span class="muted">(${TERMS.filter(t=>t.u==u).length} terms)</span></span></label>`).join('');
+  $('#setX').style.display=teams.length&&!finished?'':'none';
+  $('#mSet').classList.add('show'); setTimeout(()=>$('#p1').focus(),50); }
+$('#bSet').onclick=()=>{ if(teams.length&&!finished&&results.length&&!confirmBox()) return; openSet(); };
+function confirmBox(){ return true; }
+$('#setX').onclick=()=>$('#mSet').classList.remove('show');
+$('#setGo').onclick=()=>{ const u=$$('#setUnits input:checked').map(i=>+i.value);
+  if(!u.length){ alertBox('Choose at least one unit.'); return; }
+  const p1=$('#p1').value.trim(), p2=$('#p2').value.trim(); if(!p1||!p2){ alertBox('Type both players\' names.'); return; }
+  cfg={p1,p2,units:u,count:+$('#setCount').value,minutes:+$('#setMin').value}; store.set('hmCfg07',cfg); $('#mSet').classList.remove('show'); startGame(); };
+function alertBox(m){ const old=$('#needU'); if(old) old.remove(); $('#setUnits').insertAdjacentHTML('afterend',`<p class="bad" id="needU">${m}</p>`); setTimeout(()=>{ const n=$('#needU'); if(n) n.remove(); },2500); }
+$('#bHelp').onclick=()=>$('#mHelp').classList.add('show'); $('#helpX').onclick=()=>$('#mHelp').classList.remove('show');
+
+openSet();
+</script>
+</body>
+</html>
