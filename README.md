@@ -7,7 +7,6 @@ Lecture slides for Unit 6 of ARIN 320, Artificial Intelligence Applications, Uni
 | File | What it is |
 |---|---|
 | `index.html` | The full lecture: 83 slides, five cases, the simulations, the neural network, and the Fit Check |
-| `short.html` | A 33-slide version for a 90-minute class |
 | `hangman.html` | The Unit 6 AI Lab Sprint: two-player Hangman with AI terms from Units 0 to 6 |
 
 ## Keys
