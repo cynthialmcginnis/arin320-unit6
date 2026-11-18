@@ -285,6 +285,7 @@
 .reveal .cfans .a.fix{border-color:var(--ok);background:var(--ok-soft)}
 /* toolbar */
 #tools{position:fixed;top:14px;right:14px;z-index:40;display:flex;gap:6px}
+#tools a#tHang{font:600 14px "Source Sans 3",sans-serif;text-decoration:none;border:1px solid #1f8a55;background:#1f8a55;color:#fff;border-radius:8px;padding:5px 11px}
 #tools button{font:600 14px "Source Sans 3",sans-serif;border:1px solid #d8d0c0;background:rgba(251,249,244,.94);color:#1c2330;border-radius:8px;padding:5px 11px;cursor:pointer}
 #tools button.on{background:var(--cur);border-color:#fff;color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.7)}
 /* pick a student */
@@ -430,6 +431,7 @@
 <body>
 <div id="band"></div>
 <div id="tools">
+  <a id="tHang" href="hangman.html" target="_blank" rel="noopener" title="Open the Hangman lab sprint in a new tab">Hangman</a>
   <button id="tAgenda" title="Go to the agenda">Agenda</button>
   <button id="tPick" title="Pick a student (P)">Pick a student</button>
   <button id="tBig" title="Bigger text for a small classroom screen (T)">Big text</button>
