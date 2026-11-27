@@ -229,6 +229,7 @@
 .fitpick button.chip{font:inherit;font-weight:600;padding:.35em .8em;border-radius:999px;border:2px solid var(--line);background:#fff;color:#1c2330;cursor:pointer;touch-action:manipulation;min-height:2.2em}
 .fitpick button.chip:hover{border-color:var(--sec)}
 .fitpick button.chip.on{background:var(--sec);border-color:var(--sec);color:#fff}
+.fitpick button.chip.best{border-color:var(--ok);box-shadow:0 0 0 3px var(--ok)}
 .clue.right{border-left-color:var(--ok);background:var(--ok-soft)}
 .reveal .clue.wrong{border-left-color:var(--miss);background:var(--miss-soft)}
 .reveal .fb{font-size:.56em;margin-top:.4em;line-height:1.35}
@@ -1317,7 +1318,7 @@
   <div class="clue" id="fitClue"></div>
   <div class="row" style="justify-content:space-between">
     <div class="row" style="margin:0"><button class="btn ghost" id="fitPrev">◀ Clue</button><button class="btn ghost" id="fitNext">Clue ▶</button><div class="dots" id="fitDots" style="margin-left:.4em"></div></div>
-    <div class="row" style="margin:0"><button class="btn" id="fitCheck">Check my answers</button><span style="font-size:.5em;font-weight:700;color:var(--sec)" id="fitScore"></span></div>
+    <div class="row" style="margin:0"><button class="btn ghost" id="fitReset">Start over</button><button class="btn" id="fitCheck">Check my answers</button><span style="font-size:.5em;font-weight:700;color:var(--sec)" id="fitScore"></span></div>
   </div>
 </section>
 
@@ -2129,19 +2130,22 @@ INIT.fit=()=>{
   const render=()=>{ const c=CL[cur], a=ans[cur], el=$('#fitClue');
     let cls='clue'; let fb='';
     if(checked){ const r=result(cur); cls+=r.okQ&&r.okM?' right':' wrong';
-      fb=`<div class="fb"><span class="${r.okQ?'ok':'miss'}">${r.okQ?'Question: correct.':'Question: not the best choice.'}</span> <span class="${r.okM?'ok':'miss'}">${r.okM?'Way to adapt: correct.':'Way to adapt: not the best choice.'}</span> ${c[4]}</div>`; }
+      fb=`<div class="fb"><span class="${r.okQ?'ok':'miss'}">${r.okQ?'Question: correct.':'Question: not the best choice.'}</span> <span class="${r.okM?'ok':'miss'}">${r.okM?'Way to adapt: correct.':'Way to adapt: not the best choice.'}</span> ${c[4]}${r.okQ&&r.okM?'':' <span style="color:var(--ok);font-weight:700">Green outline = best answer.</span>'}</div>`; }
     el.className=cls;
     el.innerHTML=`<div class="src">Clue ${cur+1} of 10 · ${c[0]}</div><p>${c[1]}</p>
-      <div class="fitpick"><div class="lab">Fit Check question</div><div class="chips">${Q.map((q,j)=>`<button type="button" class="chip${a.q===String(j)?' on':''}" data-k="q" data-v="${j}">${q}</button>`).join('')}</div></div>
-      <div class="fitpick"><div class="lab">Way to adapt</div><div class="chips">${MV.map((m,j)=>`<button type="button" class="chip${a.m===String(j)?' on':''}" data-k="m" data-v="${j}">${m}</button>`).join('')}</div></div>${fb}`;
+      <div class="fitpick"><div class="lab">Fit Check question</div><div class="chips">${Q.map((q,j)=>`<button type="button" class="chip${a.q===String(j)?' on':''}${checked&&c[2].includes(j)?' best':''}" data-k="q" data-v="${j}">${q}</button>`).join('')}</div></div>
+      <div class="fitpick"><div class="lab">Way to adapt</div><div class="chips">${MV.map((m,j)=>`<button type="button" class="chip${a.m===String(j)?' on':''}${checked&&c[3].includes(j)?' best':''}" data-k="m" data-v="${j}">${m}</button>`).join('')}</div></div>${fb}`;
     el.querySelectorAll('button.chip').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; ans[cur][k]=b.dataset.v;
+      if(checked){ score(); render(); return; }
       b.parentNode.querySelectorAll('button.chip').forEach(z=>z.classList.toggle('on',z===b)); b.blur(); dots(); });
     dots(); };
-  const dots=()=>{ $('#fitDots').innerHTML=CL.map((_,i)=>{ let k=''; if(checked){ const r=result(i); k=r.okQ&&r.okM?'ok':'no'; } else if(ans[i].q!==''&&ans[i].m!=='') k='on'; return `<span class="${k}" style="${i===cur?'outline:2px solid #334e68;outline-offset:1px':''}"></span>`; }).join(''); };
+  const dots=()=>{ $('#fitDots').innerHTML=CL.map((_,i)=>{ let k=''; if(checked&&ans[i].q!==''&&ans[i].m!==''){ const r=result(i); k=r.okQ&&r.okM?'ok':'no'; } else if(ans[i].q!==''&&ans[i].m!=='') k='on'; return `<span class="${k}" style="${i===cur?'outline:2px solid #334e68;outline-offset:1px':''}"></span>`; }).join(''); };
   $('#fitPrev').onclick=()=>{ cur=(cur+9)%10; render(); };
   $('#fitNext').onclick=()=>{ cur=(cur+1)%10; render(); };
-  $('#fitCheck').onclick=()=>{ checked=true; let q=0,m=0; CL.forEach((_,i)=>{ const r=result(i); if(r.okQ) q++; if(r.okM) m++; });
-    $('#fitScore').textContent=`Questions ${q}/10 · Ways to adapt ${m}/10`; render(); };
+  const score=()=>{ let q=0,m=0,left=0; CL.forEach((_,i)=>{ const r=result(i); if(r.okQ) q++; if(r.okM) m++; if(ans[i].q===''||ans[i].m==='') left++; });
+    $('#fitScore').textContent=`Questions ${q}/10 · Ways to adapt ${m}/10`+(left?` · ${left} not answered`:''); };
+  $('#fitCheck').onclick=()=>{ checked=true; score(); render(); };
+  $('#fitReset').onclick=()=>{ ans.forEach(a=>{a.q='';a.m='';}); checked=false; cur=0; $('#fitScore').textContent=''; render(); };
   render();
 };
 /* ===================== shared 3D neural-network backgrounds ===================== */
