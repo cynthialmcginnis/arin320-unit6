@@ -1138,7 +1138,7 @@
     <div>
       <div class="nnrow"><span class="nnlab">Lab photos<br><small>bright, sharp</small></span><div class="thumbs" id="nnLab"></div></div>
       <div class="nnrow"><span class="nnlab">Clinic photos<br><small>dim, blurry</small></span><div class="thumbs" id="nnClinic"></div></div>
-      <p class="tiny" style="color:#9fb0c3;margin:.2em 0">Disease shows as bright gold spots. In the dim clinic photos the spots are hard to see. Select any photo to send it through the network.</p>
+      <p class="tiny" style="color:#9fb0c3;margin:.2em 0">Disease shows as bright gold spots. In the dim clinic photos the spots are hard to see. Select any photo to send it through the network. <a href="train-the-model.html" target="_blank" rel="noopener" style="color:#5fb6ff;font-weight:700">Open in its own page ↗</a></p>
       <div class="steps">
         <button class="btn" id="nnTrain">1 · Train on 400 lab photos</button>
         <button class="btn" id="nnTest" disabled>2 · Test in the lab and the clinic</button>
@@ -2350,7 +2350,7 @@ INIT.nn=()=>{
   chart();
   const acc=(m,d)=>tf.tidy(()=>{ const p=m.predict(d.xs).argMax(1), t=d.ys.argMax(1); return p.equal(t).mean().arraySync(); });
   const train=async(withClinic)=>{ if(typeof tf==='undefined'){ msg('TensorFlow.js needs an internet connection.'); return; }
-    ['#nnTrain','#nnTest','#nnFix'].forEach(id=>$(id).disabled=true); hist=[]; chart(); if(model) model.dispose(); model=build();
+    ['#nnTrain','#nnTest','#nnFix'].forEach(id=>$(id).disabled=true); try{ if(tf.getBackend()!=='cpu'){ await tf.setBackend('cpu'); await tf.ready(); } }catch(e){} hist=[]; chart(); if(model) model.dispose(); model=build();
     let d=dataset(400,false,11); if(withClinic){ const c=dataset(80,true,12); const xs=tf.concat([d.xs,c.xs]), ys=tf.concat([d.ys,c.ys]); d.xs.dispose(); d.ys.dispose(); c.xs.dispose(); c.ys.dispose(); d={xs,ys}; }
     msg(withClinic?'Retraining from scratch on 400 lab photos plus 80 clinic photos…':'Training on 400 lab photos… Each round, the network adjusts its 2,354 weights to make fewer mistakes.');
     for(let tryN=0;tryN<3;tryN++){ if(tryN){ model.dispose(); model=build(); hist=[]; chart(); }
