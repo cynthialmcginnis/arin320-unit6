@@ -223,7 +223,10 @@
 .reveal .clue p{font-size:.82em;margin:.25em 0 .4em}
 .reveal .clue .sel{display:grid;grid-template-columns:1fr 1fr;gap:.6em;font-size:.58em}
 .reveal .clue .sel label{display:flex;flex-direction:column;gap:.2em;font-weight:600}
-.reveal .fitpick{font-size:.5em;margin:.15em 0}
+.reveal .fithow{display:grid;grid-template-columns:1.1fr 1fr;gap:1.2em;font-size:.46em;line-height:1.35;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.5em .9em;margin-bottom:.45em}
+.fithow ol,.fithow ul{margin:.2em 0 0;padding-left:1.3em}
+.fithow li{margin:.1em 0}
+.fitpick{font-size:.5em;margin:.15em 0}
 .fitpick .lab{font-weight:700;margin:.25em 0 .2em;color:var(--ink,#1c2330)}
 .fitpick .chips{display:flex;flex-wrap:wrap;gap:.35em}
 .fitpick button.chip{font:inherit;font-weight:600;padding:.35em .8em;border-radius:999px;border:2px solid var(--line);background:#fff;color:#1c2330;cursor:pointer;touch-action:manipulation;min-height:2.2em}
@@ -1314,7 +1317,25 @@
 <section data-prevent-swipe data-sec="7" data-init="fit" class="dense">
   <div class="kicker">Simulation · Run the Fit Check</div>
   <h2 style="font-size:1.15em;margin-bottom:.2em">A U.S. city's chatbot is moving to a base housing office in Japan.</h2>
-  <p class="sub" style="font-size:.56em">The city's GenAI chatbot answers questions about trash, parking, repairs, and permits. For each clue, tap the Fit Check question it raises and the best way to adapt. (Invented scenario.)</p>
+  <p class="sub" style="font-size:.56em;margin-bottom:.3em">The city's GenAI chatbot answers residents' questions about trash, parking, repairs, and permits. Is it ready for the housing office? Ten clues will tell you. (Invented scenario.)</p>
+  <div class="fithow">
+    <div><b>What you do</b>
+      <ol>
+        <li>Read the clue.</li>
+        <li><b>Fit Check question:</b> tap the problem the clue shows. If you see two, pick the bigger one.</li>
+        <li><b>Way to adapt:</b> tap the best fix for that problem.</li>
+        <li>Tap <b>Clue ▶</b> for the next clue. Answer all 10.</li>
+        <li>Tap <b>Check my answers</b>. Green means right. A green outline marks the best answer. Change any answer to try again.</li>
+      </ol></div>
+    <div><b>The five Fit Check questions</b>
+      <ul>
+        <li><b>Data:</b> does the data here look like what it learned from?</li>
+        <li><b>Users:</b> who acts on it, and what do they do when it's wrong?</li>
+        <li><b>Workflow:</b> where does it fit in the day? What happens with no answer?</li>
+        <li><b>Stakes:</b> what does a mistake cost, and who pays?</li>
+        <li><b>Rules:</b> which laws and approvals apply?</li>
+      </ul></div>
+  </div>
   <div class="clue" id="fitClue"></div>
   <div class="row" style="justify-content:space-between">
     <div class="row" style="margin:0"><button class="btn ghost" id="fitPrev">◀ Clue</button><button class="btn ghost" id="fitNext">Clue ▶</button><div class="dots" id="fitDots" style="margin-left:.4em"></div></div>
