@@ -1325,7 +1325,7 @@
         <li><b>Fit Check question:</b> tap the problem the clue shows. If you see two, pick the bigger one.</li>
         <li><b>Way to adapt:</b> tap the best fix for that problem.</li>
         <li>Tap <b>Clue ▶</b> for the next clue. Answer all 10.</li>
-        <li>Tap <b>Check my answers</b>. Green means right. A green outline marks the best answer. Change any answer to try again.</li>
+        <li>Tap <b>Check my answers</b>. Each answered clue turns green (right) or red (try again). A green outline marks the best answer. You can change any answer.</li>
       </ol></div>
     <div><b>The five Fit Check questions</b>
       <ul>
@@ -2150,12 +2150,14 @@ INIT.fit=()=>{
   const result=i=>{ const a=ans[i], c=CL[i]; return {okQ:a.q!==''&&c[2].includes(+a.q), okM:a.m!==''&&c[3].includes(+a.m)}; };
   const render=()=>{ const c=CL[cur], a=ans[cur], el=$('#fitClue');
     let cls='clue'; let fb='';
-    if(checked){ const r=result(cur); cls+=r.okQ&&r.okM?' right':' wrong';
+    const done=a.q!==''&&a.m!=='', judged=checked&&done;
+    if(checked&&!done) fb=`<div class="fb">Answer both rows. This clue is checked as soon as you do.</div>`;
+    if(judged){ const r=result(cur); cls+=r.okQ&&r.okM?' right':' wrong';
       fb=`<div class="fb"><span class="${r.okQ?'ok':'miss'}">${r.okQ?'Question: correct.':'Question: not the best choice.'}</span> <span class="${r.okM?'ok':'miss'}">${r.okM?'Way to adapt: correct.':'Way to adapt: not the best choice.'}</span> ${c[4]}${r.okQ&&r.okM?'':' <span style="color:var(--ok);font-weight:700">Green outline = best answer.</span>'}</div>`; }
     el.className=cls;
     el.innerHTML=`<div class="src">Clue ${cur+1} of 10 · ${c[0]}</div><p>${c[1]}</p>
-      <div class="fitpick"><div class="lab">Fit Check question</div><div class="chips">${Q.map((q,j)=>`<button type="button" class="chip${a.q===String(j)?' on':''}${checked&&c[2].includes(j)?' best':''}" data-k="q" data-v="${j}">${q}</button>`).join('')}</div></div>
-      <div class="fitpick"><div class="lab">Way to adapt</div><div class="chips">${MV.map((m,j)=>`<button type="button" class="chip${a.m===String(j)?' on':''}${checked&&c[3].includes(j)?' best':''}" data-k="m" data-v="${j}">${m}</button>`).join('')}</div></div>${fb}`;
+      <div class="fitpick"><div class="lab">Fit Check question</div><div class="chips">${Q.map((q,j)=>`<button type="button" class="chip${a.q===String(j)?' on':''}${judged&&c[2].includes(j)?' best':''}" data-k="q" data-v="${j}">${q}</button>`).join('')}</div></div>
+      <div class="fitpick"><div class="lab">Way to adapt</div><div class="chips">${MV.map((m,j)=>`<button type="button" class="chip${a.m===String(j)?' on':''}${judged&&c[3].includes(j)?' best':''}" data-k="m" data-v="${j}">${m}</button>`).join('')}</div></div>${fb}`;
     el.querySelectorAll('button.chip').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; ans[cur][k]=b.dataset.v;
       if(checked){ score(); render(); return; }
       b.parentNode.querySelectorAll('button.chip').forEach(z=>z.classList.toggle('on',z===b)); b.blur(); dots(); });
