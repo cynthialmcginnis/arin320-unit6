@@ -223,7 +223,13 @@
 .reveal .clue p{font-size:.82em;margin:.25em 0 .4em}
 .reveal .clue .sel{display:grid;grid-template-columns:1fr 1fr;gap:.6em;font-size:.58em}
 .reveal .clue .sel label{display:flex;flex-direction:column;gap:.2em;font-weight:600}
-.reveal .clue.right{border-left-color:var(--ok);background:var(--ok-soft)}
+.reveal .fitpick{font-size:.5em;margin:.15em 0}
+.fitpick .lab{font-weight:700;margin:.25em 0 .2em;color:var(--ink,#1c2330)}
+.fitpick .chips{display:flex;flex-wrap:wrap;gap:.35em}
+.fitpick button.chip{font:inherit;font-weight:600;padding:.35em .8em;border-radius:999px;border:2px solid var(--line);background:#fff;color:#1c2330;cursor:pointer;touch-action:manipulation;min-height:2.2em}
+.fitpick button.chip:hover{border-color:var(--sec)}
+.fitpick button.chip.on{background:var(--sec);border-color:var(--sec);color:#fff}
+.clue.right{border-left-color:var(--ok);background:var(--ok-soft)}
 .reveal .clue.wrong{border-left-color:var(--miss);background:var(--miss-soft)}
 .reveal .fb{font-size:.56em;margin-top:.4em;line-height:1.35}
 .reveal .dots{display:flex;gap:5px;flex-wrap:wrap}
@@ -1307,7 +1313,7 @@
 <section data-sec="7" data-init="fit" class="dense">
   <div class="kicker">Simulation · Run the Fit Check</div>
   <h2 style="font-size:1.15em;margin-bottom:.2em">A U.S. city's chatbot is moving to a base housing office in Japan.</h2>
-  <p class="sub" style="font-size:.56em">The city's GenAI chatbot answers questions about trash, parking, repairs, and permits. For each clue, pick the Fit Check question it raises and the best fix. (Invented scenario.)</p>
+  <p class="sub" style="font-size:.56em">The city's GenAI chatbot answers questions about trash, parking, repairs, and permits. For each clue, tap the Fit Check question it raises and the best way to adapt. (Invented scenario.)</p>
   <div class="clue" id="fitClue"></div>
   <div class="row" style="justify-content:space-between">
     <div class="row" style="margin:0"><button class="btn ghost" id="fitPrev">◀ Clue</button><button class="btn ghost" id="fitNext">Clue ▶</button><div class="dots" id="fitDots" style="margin-left:.4em"></div></div>
@@ -2126,10 +2132,10 @@ INIT.fit=()=>{
       fb=`<div class="fb"><span class="${r.okQ?'ok':'miss'}">${r.okQ?'Question: correct.':'Question: not the best choice.'}</span> <span class="${r.okM?'ok':'miss'}">${r.okM?'Way to adapt: correct.':'Way to adapt: not the best choice.'}</span> ${c[4]}</div>`; }
     el.className=cls;
     el.innerHTML=`<div class="src">Clue ${cur+1} of 10 · ${c[0]}</div><p>${c[1]}</p>
-      <div class="sel"><label>Fit Check question<select id="fq"><option value="">Choose</option>${Q.map((q,j)=>`<option value="${j}" ${a.q===String(j)?'selected':''}>${q}</option>`).join('')}</select></label>
-      <label>Way to adapt<select id="fm"><option value="">Choose</option>${MV.map((m,j)=>`<option value="${j}" ${a.m===String(j)?'selected':''}>${m}</option>`).join('')}</select></label></div>${fb}`;
-    $('#fq').onchange=e=>{ ans[cur].q=e.target.value; e.target.blur(); dots(); };
-    $('#fm').onchange=e=>{ ans[cur].m=e.target.value; e.target.blur(); dots(); };
+      <div class="fitpick"><div class="lab">Fit Check question</div><div class="chips">${Q.map((q,j)=>`<button type="button" class="chip${a.q===String(j)?' on':''}" data-k="q" data-v="${j}">${q}</button>`).join('')}</div></div>
+      <div class="fitpick"><div class="lab">Way to adapt</div><div class="chips">${MV.map((m,j)=>`<button type="button" class="chip${a.m===String(j)?' on':''}" data-k="m" data-v="${j}">${m}</button>`).join('')}</div></div>${fb}`;
+    el.querySelectorAll('button.chip').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; ans[cur][k]=b.dataset.v;
+      b.parentNode.querySelectorAll('button.chip').forEach(z=>z.classList.toggle('on',z===b)); b.blur(); dots(); });
     dots(); };
   const dots=()=>{ $('#fitDots').innerHTML=CL.map((_,i)=>{ let k=''; if(checked){ const r=result(i); k=r.okQ&&r.okM?'ok':'no'; } else if(ans[i].q!==''&&ans[i].m!=='') k='on'; return `<span class="${k}" style="${i===cur?'outline:2px solid #334e68;outline-offset:1px':''}"></span>`; }).join(''); };
   $('#fitPrev').onclick=()=>{ cur=(cur+9)%10; render(); };
