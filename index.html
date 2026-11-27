@@ -562,7 +562,7 @@
   <aside class="notes">Ask: "If you were Google, what would you build?" Most say: something to read the photos. That was a good idea. Nothing that follows is about a bad idea.</aside>
 </section>
 
-<section data-sec="1" data-init="hook">
+<section data-prevent-swipe data-sec="1" data-init="hook">
   <div class="kicker">Predict before you see it</div>
   <h2>Out of every 100 clinic photos, how many did the system reject as too poor to read?</h2>
   <div class="predict"><input type="range" id="hookSl" min="0" max="60" value="5" aria-label="My prediction in percent"><output id="hookV">5%</output></div>
@@ -611,7 +611,7 @@
   </div>
 </section>
 
-<section data-deck="study" data-sec="1" data-init="rwn" class="dense">
+<section data-prevent-swipe data-deck="study" data-sec="1" data-init="rwn" class="dense">
   <div class="kicker">Try it</div>
   <h2 style="margin-bottom:.25em">Three companies sell you an eye scanner. Which would you buy?</h2>
   <div class="grid2" style="grid-template-columns:1.3fr 1fr;gap:1em;align-items:start">
@@ -636,7 +636,7 @@
   <aside class="notes">7 of 100 patients have the disease. A: answers everyone, 4 sick patients told they are fine. B: rejects 30, 95 percent on the rest, about 67 helped. C: says "no disease" to all, 93 percent accurate, misses all 7.</aside>
 </section>
 
-<section data-sec="1" data-init="eye" class="dense">
+<section data-prevent-swipe data-sec="1" data-init="eye" class="dense">
   <div class="kicker">Simulation · The eye clinic</div>
   <h2 style="font-size:1.15em;margin-bottom:.25em">Same model, three stages. Then you fix the clinic.</h2>
   <div class="grid2" style="grid-template-columns:1fr 1.05fr;gap:.8em;align-items:start">
@@ -740,7 +740,7 @@
   </div>
 </section>
 
-<section data-sec="3" data-init="ward" class="dense">
+<section data-prevent-swipe data-sec="3" data-init="ward" class="dense">
   <div class="kicker">Simulation · The night shift</div>
   <div class="grid2" style="grid-template-columns:1.45fr 1fr;gap:.7em;align-items:start">
     <div>
@@ -834,7 +834,7 @@
   </div>
 </section>
 
-<section data-sec="4" data-init="flip" class="dense">
+<section data-prevent-swipe data-sec="4" data-init="flip" class="dense">
   <div class="kicker">Simulation · The home-buying desk</div>
   <div class="row" id="flTabs" style="margin:0 0 .35em">
     <button class="tb on" data-step="1">1 · The website</button><button class="tb" data-step="2">2 · Buy at the estimate</button><button class="tb" data-step="3">3 · Offer less</button><button class="tb" data-step="4">4 · The market turns</button>
@@ -913,7 +913,7 @@
   </div>
 </section>
 
-<section data-deck="study" data-sec="5" data-init="pm" class="dense">
+<section data-prevent-swipe data-deck="study" data-sec="5" data-init="pm" class="dense">
   <div class="kicker">Simulation · The motor pool</div>
   <div class="grid2" style="grid-template-columns:1fr 1.15fr;gap:.8em;align-items:start">
     <div>
@@ -1024,7 +1024,7 @@
   <aside class="notes">Source: Page and Gehlbach (2017). Connecting Pounce to the student records was new for summer melt programs; earlier efforts sent the same message to everyone, and students tuned them out. Next: the simulation lets students test which design choices made the difference.</aside>
 </section>
 
-<section data-deck="study" data-sec="6" data-init="pounce" class="dense">
+<section data-prevent-swipe data-deck="study" data-sec="6" data-init="pounce" class="dense">
   <div class="kicker">Simulation · The summer assistant</div>
   <div class="grid2" style="grid-template-columns:1fr 1.1fr;gap:.8em;align-items:start">
     <div>
@@ -1137,7 +1137,7 @@
   <p class="point fragment">The only defense: test on data from the place where the tool will be used, before anyone depends on it.</p>
 </section>
 
-<section data-sec="2" data-init="nn" class="dark ai dense" data-ask="nn">
+<section data-prevent-swipe data-sec="2" data-init="nn" class="dark ai dense" data-ask="nn">
   <div class="kicker">Real AI · Train a neural network in your browser</div>
   <h2 style="font-size:1.1em;margin-bottom:.2em">Train it on lab photos. Test it in the clinic. Watch domain shift happen.</h2>
   <div class="grid2" style="grid-template-columns:1fr 1.05fr;gap:.8em;align-items:start">
@@ -1179,7 +1179,7 @@
   <p class="tiny" style="margin-top:.4em">158,323 chest X-rays from three U.S. hospital systems (Zech et al., 2018). Scores are AUC.</p>
 </section>
 
-<section data-deck="study" id="lab3d" data-sec="2" data-init="shortcut" class="dense">
+<section data-prevent-swipe data-deck="study" id="lab3d" data-sec="2" data-init="shortcut" class="dense">
   <div class="kicker">Simulation · The shortcut lab · 3D</div>
   <div class="grid2" style="grid-template-columns:1.35fr 1fr;gap:.8em;align-items:start">
     <div>
@@ -1310,7 +1310,7 @@
   <p class="point fragment">Higher stakes raise the testing bar. A movie recommender can learn from its mistakes in public. A medical alert has to prove itself first.</p>
 </section>
 
-<section data-sec="7" data-init="fit" class="dense">
+<section data-prevent-swipe data-sec="7" data-init="fit" class="dense">
   <div class="kicker">Simulation · Run the Fit Check</div>
   <h2 style="font-size:1.15em;margin-bottom:.2em">A U.S. city's chatbot is moving to a base housing office in Japan.</h2>
   <p class="sub" style="font-size:.56em">The city's GenAI chatbot answers questions about trash, parking, repairs, and permits. For each clue, tap the Fit Check question it raises and the best way to adapt. (Invented scenario.)</p>
@@ -1425,7 +1425,7 @@
 </section>
 
 <!-- ============================== APPLY ============================== -->
-<section data-deck="study" id="genai" class="dark ai" data-sec="7" data-init="genai" data-ask="capstone">
+<section data-prevent-swipe data-deck="study" id="genai" class="dark ai" data-sec="7" data-init="genai" data-ask="capstone">
   <div class="bg3d" data-net="sec" style="opacity:.28"></div>
   <div class="tleft wide">
     <div class="kicker">GenAI · Your capstone</div>
@@ -1441,7 +1441,7 @@
   <aside class="notes">In the hosted version, this calls GenAI directly. On GitHub Pages, it opens Claude or ChatGPT with the prompt filled in. Ask: "What did it get wrong about your organization?" That is domain knowledge GenAI doesn't have.</aside>
 </section>
 
-<section data-deck="study" data-sec="7" data-init="capfit">
+<section data-prevent-swipe data-deck="study" data-sec="7" data-init="capfit">
   <div class="kicker">Your capstone · practice</div>
   <h2 style="font-size:1.2em;margin-bottom:.2em">Run the Fit Check on a classmate's kind of organization.</h2>
   <div class="row" id="cfOrgs" style="margin:0 0 .3em"></div>
