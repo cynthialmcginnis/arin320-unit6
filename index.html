@@ -223,7 +223,8 @@
 .reveal .clue p{font-size:.82em;margin:.25em 0 .4em}
 .reveal .clue .sel{display:grid;grid-template-columns:1fr 1fr;gap:.6em;font-size:.58em}
 .reveal .clue .sel label{display:flex;flex-direction:column;gap:.2em;font-weight:600}
-.reveal .fithow{display:grid;grid-template-columns:1.1fr 1fr;gap:1.2em;font-size:.46em;line-height:1.35;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.5em .9em;margin-bottom:.45em}
+.reveal .fithow{display:grid;grid-template-columns:1.1fr 1fr;gap:1.2em;font-size:.42em;line-height:1.3;background:#fff;border:1px solid var(--line);border-radius:10px;padding:.4em .9em;margin-bottom:.35em}
+.fithow .h{display:block;font-weight:700}
 .fithow ol,.fithow ul{margin:.2em 0 0;padding-left:1.3em}
 .fithow li{margin:.1em 0}
 .fitpick{font-size:.5em;margin:.15em 0}
@@ -233,6 +234,11 @@
 .fitpick button.chip:hover{border-color:var(--sec)}
 .fitpick button.chip.on{background:var(--sec);border-color:var(--sec);color:#fff}
 .fitpick button.chip.best{border-color:var(--ok);box-shadow:0 0 0 3px var(--ok)}
+.fitpick .acts{display:flex;flex-direction:column;gap:.25em}
+.fitpick button.act{font:inherit;text-align:left;padding:.25em .8em;border-radius:8px;border:2px solid var(--line);background:#fff;color:#1c2330;cursor:pointer;touch-action:manipulation}
+.fitpick button.act:hover{border-color:var(--sec)}
+.fitpick button.act.on{background:var(--sec);border-color:var(--sec);color:#fff}
+.fitpick button.act.best{border-color:var(--ok);box-shadow:0 0 0 3px var(--ok)}
 .clue.right{border-left-color:var(--ok);background:var(--ok-soft)}
 .reveal .clue.wrong{border-left-color:var(--miss);background:var(--miss-soft)}
 .reveal .fb{font-size:.56em;margin-top:.4em;line-height:1.35}
@@ -1319,15 +1325,15 @@
   <h2 style="font-size:1.15em;margin-bottom:.2em">A U.S. city's chatbot is moving to a base housing office in Japan.</h2>
   <p class="sub" style="font-size:.56em;margin-bottom:.3em">The city's GenAI chatbot answers residents' questions about trash, parking, repairs, and permits. Is it ready for the housing office? Ten clues will tell you. (Invented scenario.)</p>
   <div class="fithow">
-    <div><b>What you do</b>
+    <div><div class="h">What you do</div>
       <ol>
         <li>Read the clue.</li>
-        <li><b>Fit Check question:</b> tap the problem the clue shows. If you see two, pick the bigger one.</li>
-        <li><b>Way to adapt:</b> tap the best fix for that problem.</li>
-        <li>Tap <b>Clue ▶</b> for the next clue. Answer all 10.</li>
-        <li>Tap <b>Check my answers</b>. Each answered clue turns green (right) or red (try again). A green outline marks the best answer. You can change any answer.</li>
+        <li>Tap <b>every</b> Fit Check question it raises. Some clues raise two.</li>
+        <li>Pick what the housing office should do. You see right away if it's the best choice.</li>
+        <li>Tap <b>Clue ▶</b> for the next clue.</li>
+        <li>After clue 10, make your call: switch it on, adapt it first, or stop.</li>
       </ol></div>
-    <div><b>The five Fit Check questions</b>
+    <div><div class="h">The five Fit Check questions</div>
       <ul>
         <li><b>Data:</b> does the data here look like what it learned from?</li>
         <li><b>Users:</b> who acts on it, and what do they do when it's wrong?</li>
@@ -1338,8 +1344,8 @@
   </div>
   <div class="clue" id="fitClue"></div>
   <div class="row" style="justify-content:space-between">
-    <div class="row" style="margin:0"><button class="btn ghost" id="fitPrev">◀ Clue</button><button class="btn ghost" id="fitNext">Clue ▶</button><div class="dots" id="fitDots" style="margin-left:.4em"></div></div>
-    <div class="row" style="margin:0"><button class="btn ghost" id="fitReset">Start over</button><button class="btn" id="fitCheck">Check my answers</button><span style="font-size:.5em;font-weight:700;color:var(--sec)" id="fitScore"></span></div>
+    <div class="row" style="margin:0"><button class="btn ghost" id="fitPrev">◀ Clue</button><button class="btn ghost" id="fitNext">Clue ▶</button><div class="dots" id="fitDots" style="margin-left:.4em"></div><button class="btn ghost" id="fitReset" style="margin-left:.6em">Start over</button></div>
+    <div class="row" style="margin:0;padding-right:2.2em"><span style="font-size:.5em;font-weight:700;color:var(--sec)" id="fitScore"></span></div>
   </div>
 </section>
 
@@ -2134,42 +2140,100 @@ INIT.capfit=()=>{
 
 /* ---- Simulation 7: Fit Check ---- */
 INIT.fit=()=>{
-  const Q=['Data','Users','Workflow','Stakes','Rules'], MV=['Narrow the job','Use local data','Move the threshold','Redesign the workflow','Send hard cases to a person','Stop until it is fixed'];
+  const Q=['Data','Users','Workflow','Stakes','Rules'];
+  /* Each clue: source, text, accepted Fit Check questions, three actions [text, best?, why], explanation */
   const CL=[
-   ['Vendor sheet','The chatbot learned from the city\'s own web pages and 40,000 past questions from city residents.',[0],[1],'Data. It learned one city\'s rules and residents. Load the housing office\'s own rules and answers.'],
-   ['Housing office notes','Trash outside the installation follows the local Japanese city\'s sorting rules, with more categories and different pickup days.',[0,4],[1],'Data, and Rules. The city chatbot has never seen these rules. It would answer confidently with the wrong ones.'],
-   ['Vendor sheet','The vendor reports that 92 percent of city residents\' questions were answered correctly.',[0],[1],'Data. The score was measured on city questions. Test it on 100 real questions from housing residents first: external validation.'],
-   ['Resident email','Many residents are spouses whose first language is not English. Some questions come from Japanese employees of the housing office.',[1],[1,0],'Users. Test it with these users\' real wording. Narrowing the job to simple questions also helps.'],
-   ['Housing office notes','Families move every 2 to 3 years, so most residents are new each summer and do not know the office\'s process.',[1],[2,3],'Users. New residents cannot tell a wrong answer from a right one. Design the workflow so answers link to the office\'s own pages.'],
-   ['Housing office notes','Staff answer phones from 8:00 AM to 4:00 PM. Nobody has said what happens to a question the chatbot cannot answer at night.',[2],[4,3],'Workflow. Plan where an unanswered question goes, and send it to a person the next morning.'],
-   ['Housing office notes','No one is assigned to review the chatbot\'s answers or update them when a rule changes.',[2],[3],'Workflow. Name one owner who reviews answers every week. Without an owner, it drifts out of date.'],
-   ['Lease rules','A wrong answer about ending a lease early can cost a family a penalty when they receive orders to move.',[3],[4],'Stakes. Send every lease question to a staff member.'],
-   ['Repair log','Questions about gas smells, mold, or broken heat in winter need a work order the same day.',[3],[4,3],'Stakes. A slow or wrong answer is a safety problem. Route these to a person at once, with a same-day work order.'],
-   ['Privacy office','Residents\' addresses and family details are protected by privacy rules. The vendor stores conversations on servers in the United States.',[4],[5],'Rules. Where the data is stored must be approved before the chatbot goes live. Stop until it is approved.']];
-  const ans=CL.map(()=>({q:'',m:''})); let cur=0, checked=false;
-  const result=i=>{ const a=ans[i], c=CL[i]; return {okQ:a.q!==''&&c[2].includes(+a.q), okM:a.m!==''&&c[3].includes(+a.m)}; };
-  const render=()=>{ const c=CL[cur], a=ans[cur], el=$('#fitClue');
-    let cls='clue'; let fb='';
-    const done=a.q!==''&&a.m!=='', judged=checked&&done;
-    if(checked&&!done) fb=`<div class="fb">Answer both rows. This clue is checked as soon as you do.</div>`;
-    if(judged){ const r=result(cur); cls+=r.okQ&&r.okM?' right':' wrong';
-      fb=`<div class="fb"><span class="${r.okQ?'ok':'miss'}">${r.okQ?'Question: correct.':'Question: not the best choice.'}</span> <span class="${r.okM?'ok':'miss'}">${r.okM?'Way to adapt: correct.':'Way to adapt: not the best choice.'}</span> ${c[4]}${r.okQ&&r.okM?'':' <span style="color:var(--ok);font-weight:700">Green outline = best answer.</span>'}</div>`; }
-    el.className=cls;
-    el.innerHTML=`<div class="src">Clue ${cur+1} of 10 · ${c[0]}</div><p>${c[1]}</p>
-      <div class="fitpick"><div class="lab">Fit Check question</div><div class="chips">${Q.map((q,j)=>`<button type="button" class="chip${a.q===String(j)?' on':''}${judged&&c[2].includes(j)?' best':''}" data-k="q" data-v="${j}">${q}</button>`).join('')}</div></div>
-      <div class="fitpick"><div class="lab">Way to adapt</div><div class="chips">${MV.map((m,j)=>`<button type="button" class="chip${a.m===String(j)?' on':''}${judged&&c[3].includes(j)?' best':''}" data-k="m" data-v="${j}">${m}</button>`).join('')}</div></div>${fb}`;
-    el.querySelectorAll('button.chip').forEach(b=>b.onclick=()=>{ const k=b.dataset.k; ans[cur][k]=b.dataset.v;
-      if(checked){ score(); render(); return; }
-      b.parentNode.querySelectorAll('button.chip').forEach(z=>z.classList.toggle('on',z===b)); b.blur(); dots(); });
+   {src:'Vendor sheet', text:'The chatbot learned from the city\'s own web pages and 40,000 past questions from city residents.', q:[0],
+    acts:[['Switch it on now. 40,000 questions is plenty of data.',0,'That is a lot of data, but it is about the wrong place.'],
+          ['Load the housing office\'s own rules, forms, and past questions, then test it.',1,''],
+          ['Ask the vendor for a newer version of the city chatbot.',0,'A newer city chatbot still knows only the city.']],
+    why:'<b>Data.</b> It learned one city\'s rules and residents, not the housing office\'s.'},
+   {src:'Housing office notes', text:'Trash outside the installation follows the local Japanese city\'s sorting rules, with more categories and different pickup days.', q:[0,4],
+    acts:[['Add a note under every answer: "Answers may be wrong."',0,'Residents still sort their trash wrong. A note does not fix the answer.'],
+          ['Tell residents to call the office if they are confused.',0,'Residents will not know they are confused. The chatbot sounds sure of itself.'],
+          ['Load the local city\'s sorting rules and pickup days, and have staff check the answers before launch.',1,'']],
+    why:'<b>Data and Rules.</b> The chatbot has never seen these rules. It would answer confidently with the U.S. city\'s rules.'},
+   {src:'Vendor sheet', text:'The vendor reports that 92 percent of city residents\' questions were answered correctly.', q:[0],
+    acts:[['Test it on 100 real questions from housing residents before launch.',1,''],
+          ['Trust the 92 percent. That is a high score.',0,'The score belongs to its test data: city questions, not housing questions.'],
+          ['Ask the vendor to raise the score to 95 percent on city questions.',0,'A higher score on the wrong questions still tells you nothing here.']],
+    why:'<b>Data.</b> A score only describes the data it was measured on. Test where the tool will be used: external validation.'},
+   {src:'Resident email', text:'Many residents are spouses whose first language is not English. Some questions come from Japanese employees of the housing office.', q:[1],
+    acts:[['Ask residents to write their questions in standard English.',0,'That puts the tool\'s problem on the people it is meant to serve.'],
+          ['Test it with real questions from these residents and staff, in their own words, and start with simple questions only.',1,''],
+          ['Leave it as is. GenAI can handle any wording.',0,'Maybe, maybe not. You do not know until you test with these users.']],
+    why:'<b>Users.</b> The users here are different from the city\'s users. Test with their real wording.'},
+   {src:'Housing office notes', text:'Families move every 2 to 3 years, so most residents are new each summer and do not know the office\'s process.', q:[1,2],
+    acts:[['Assume residents will spot a wrong answer.',0,'New residents cannot tell a wrong answer from a right one.'],
+          ['Send every new family a 20-page chatbot guide.',0,'Few people read a long guide, and it does not catch wrong answers.'],
+          ['Have every answer link to the office\'s own page, so residents can check it.',1,'']],
+    why:'<b>Users</b> (and <b>Workflow</b>). New residents have nothing to check answers against. Give them the office\'s page.'},
+   {src:'Housing office notes', text:'Staff answer phones from 8:00 AM to 4:00 PM. Nobody has said what happens to a question the chatbot cannot answer at night.', q:[2],
+    acts:[['Send any question it cannot answer to staff, who reply the next morning.',1,''],
+          ['Let it give its best guess when no one is in the office.',0,'A guess at night is still a wrong answer, with no one to catch it.'],
+          ['Show "Sorry, I can\'t help" and stop there.',0,'The question is lost. The resident has to start over.']],
+    why:'<b>Workflow.</b> Plan where an unanswered question goes and who picks it up.'},
+   {src:'Housing office notes', text:'No one is assigned to review the chatbot\'s answers or update them when a rule changes.', q:[2],
+    acts:[['Let the vendor update it once a year.',0,'Housing rules change more often than that, and the vendor does not know when.'],
+          ['Name one staff member to review answers every week and update them when a rule changes.',1,''],
+          ['Let residents report errors. No one needs to be assigned.',0,'Reports with no owner pile up. Someone has to act on them.']],
+    why:'<b>Workflow.</b> Without an owner, the chatbot drifts out of date.'},
+   {src:'Lease rules', text:'A wrong answer about ending a lease early can cost a family a penalty when they receive orders to move.', q:[3,4],
+    acts:[['Let the chatbot answer. It is usually right.',0,'"Usually" is not enough when one wrong answer costs a family money.'],
+          ['Add "Check with your landlord" at the end of each answer.',0,'Families who trust the first answer will skip that line.'],
+          ['Send every lease question to a staff member.',1,'']],
+    why:'<b>Stakes</b> (and <b>Rules</b>). A mistake here costs a family money. Hard, costly cases go to a person.'},
+   {src:'Repair log', text:'Questions about gas smells, mold, or broken heat in winter need a work order the same day.', q:[3],
+    acts:[['Show the emergency number and open a same-day work order with a staff member right away.',1,''],
+          ['Have the chatbot suggest repair tips.',0,'Repair tips for a gas smell are a safety risk.'],
+          ['Log it as a normal repair request.',0,'Normal requests can wait a week. These cannot.']],
+    why:'<b>Stakes.</b> A slow or wrong answer is a safety problem. Route these to a person at once.'},
+   {src:'Privacy office', text:'Residents\' addresses and family details are protected by privacy rules. The vendor stores conversations on servers in the United States.', q:[4,3],
+    acts:[['Tell residents not to type personal details.',0,'They will anyway. An address is part of most repair requests.'],
+          ['Do not launch until the privacy office approves where the data is stored.',1,''],
+          ['Launch now and ask for approval later.',0,'Once the data is stored, you cannot take it back.']],
+    why:'<b>Rules</b> (and <b>Stakes</b>). Where the data is stored must be approved before the chatbot goes live.'}];
+  const CALL=[['Switch it on as is',0,'Not yet. Almost every clue showed a difference from the city, and clue 10 blocks launch until storage is approved.'],
+              ['Adapt it first',1,'Yes. Most problems have fixes: local data, testing with real residents, an owner, and staff for lease and safety questions. Launch only after the privacy office approves.'],
+              ['Stop the project',0,'Stopping is always a sound option, but here every problem has a fix. Adapt it, and wait for privacy approval before launch.']];
+  const N=CL.length; let cur=0, call=null;
+  const st=CL.map(()=>({q:new Set(), a:null}));
+  const judge=i=>{ const s=st[i], c=CL[i]; if(s.a===null) return null;
+    const qOK=s.q.size>0 && [...s.q].every(j=>c.q.includes(j)), missed=c.q.filter(j=>!s.q.has(j)), aOK=!!c.acts[s.a][1];
+    return {qOK,aOK,missed}; };
+  const score=()=>{ let q=0,a=0,n=0; CL.forEach((_,i)=>{ const r=judge(i); if(r){ n++; if(r.qOK) q++; if(r.aOK) a++; } });
+    $('#fitScore').textContent=n?`Fit Check ${q}/${n} · Actions ${a}/${n}`:''; };
+  const dots=()=>{ $('#fitDots').innerHTML=CL.map((_,i)=>{ const r=judge(i); const k=!r?'':(r.qOK&&r.aOK?'ok':'no');
+      return `<span class="${k}" style="${i===cur?'outline:2px solid #334e68;outline-offset:1px':''}"></span>`; }).join('')
+      +`<span class="${call===null?'':(CALL[call][1]?'ok':'no')}" title="Your call" style="border-radius:3px;${cur===N?'outline:2px solid #334e68;outline-offset:1px':''}"></span>`; };
+  const render=()=>{ const el=$('#fitClue');
+    if(cur===N){ el.className='clue'+(call===null?'':CALL[call][1]?' right':' wrong');
+      const done=st.filter(s=>s.a!==null).length;
+      el.innerHTML=`<div class="src">Your call</div><p>You found the problems. Now decide: what should the housing office do with this chatbot?</p>
+        ${done<N?`<div class="fb" style="margin:0 0 .3em">You answered ${done} of ${N} clues. You can still go back.</div>`:''}
+        <div class="fitpick"><div class="chips">${CALL.map((o,j)=>`<button type="button" class="chip${call===j?' on':''}${call!==null&&o[1]?' best':''}" data-c="${j}">${o[0]}</button>`).join('')}</div></div>
+        ${call===null?'':`<div class="fb"><span class="${CALL[call][1]?'ok':'miss'}">${CALL[call][1]?'Good call.':'Think again.'}</span> ${CALL[call][2]}</div>`}`;
+      el.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ call=+b.dataset.c; render(); });
+      dots(); return; }
+    const c=CL[cur], s=st[cur], r=judge(cur);
+    el.className='clue'+(r?(r.qOK&&r.aOK?' right':' wrong'):'');
+    let fb='';
+    if(r){ const parts=[];
+      parts.push(`<span class="${r.qOK?'ok':'miss'}">${r.qOK?'Fit Check: right.':'Fit Check: not quite.'}</span>`);
+      parts.push(`<span class="${r.aOK?'ok':'miss'}">${r.aOK?'Action: best choice.':'Action: not the best.'}</span>`);
+      let extra=c.why; if(!r.aOK) extra+=' '+c.acts[s.a][2];
+      if(r.qOK&&r.missed.length) extra+=` It also raises <b>${r.missed.map(j=>Q[j]).join(' and ')}</b>.`;
+      fb=`<div class="fb">${parts.join(' ')} ${extra}${r.qOK&&r.aOK?'':' <span style="color:var(--ok);font-weight:700">Green outline = best answer.</span>'}</div>`; }
+    el.innerHTML=`<div class="src">Clue ${cur+1} of ${N} · ${c.src}</div><p>${c.text}</p>
+      <div class="fitpick"><div class="lab">1. Which Fit Check questions does it raise? Tap all that apply.</div><div class="chips">${Q.map((q,j)=>`<button type="button" class="chip${s.q.has(j)?' on':''}${r&&!r.qOK&&c.q.includes(j)?' best':''}" data-q="${j}">${q}</button>`).join('')}</div></div>
+      <div class="fitpick"><div class="lab">2. What should the housing office do? Your answer is checked when you pick one.</div><div class="acts">${c.acts.map((o,j)=>`<button type="button" class="act${s.a===j?' on':''}${r&&!r.aOK&&o[1]?' best':''}" data-a="${j}">${o[0]}</button>`).join('')}</div></div>${fb}`;
+    el.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{ const j=+b.dataset.q; s.q.has(j)?s.q.delete(j):s.q.add(j); score(); render(); });
+    el.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ s.a=+b.dataset.a; score(); render(); });
     dots(); };
-  const dots=()=>{ $('#fitDots').innerHTML=CL.map((_,i)=>{ let k=''; if(checked&&ans[i].q!==''&&ans[i].m!==''){ const r=result(i); k=r.okQ&&r.okM?'ok':'no'; } else if(ans[i].q!==''&&ans[i].m!=='') k='on'; return `<span class="${k}" style="${i===cur?'outline:2px solid #334e68;outline-offset:1px':''}"></span>`; }).join(''); };
-  $('#fitPrev').onclick=()=>{ cur=(cur+9)%10; render(); };
-  $('#fitNext').onclick=()=>{ cur=(cur+1)%10; render(); };
-  const score=()=>{ let q=0,m=0,left=0; CL.forEach((_,i)=>{ const r=result(i); if(r.okQ) q++; if(r.okM) m++; if(ans[i].q===''||ans[i].m==='') left++; });
-    $('#fitScore').textContent=`Questions ${q}/10 · Ways to adapt ${m}/10`+(left?` · ${left} not answered`:''); };
-  $('#fitCheck').onclick=()=>{ checked=true; score(); render(); };
-  $('#fitReset').onclick=()=>{ ans.forEach(a=>{a.q='';a.m='';}); checked=false; cur=0; $('#fitScore').textContent=''; render(); };
-  render();
+  $('#fitPrev').onclick=()=>{ cur=(cur+N)%(N+1); render(); };
+  $('#fitNext').onclick=()=>{ cur=(cur+1)%(N+1); render(); };
+  $('#fitReset').onclick=()=>{ st.forEach(s=>{ s.q.clear(); s.a=null; }); call=null; cur=0; score(); render(); };
+  score(); render();
 };
 /* ===================== shared 3D neural-network backgrounds ===================== */
 const BG={r:null,map:new Map(),el:null};
