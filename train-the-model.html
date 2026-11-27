@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARIN 320 Unit 6 Simulation: Train a Neural Network, Then Move It</title>
+<style>
+  :root{
+    --bg:#0f1724; --panel:#172234; --panel2:#1d2a40; --line:#2b3a55;
+    --ink:#e8eef7; --muted:#9fb0c3; --accent:#5fb6ff; --gold:#ffbe55;
+    --ok:#5ad08f; --bad:#ff7a6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  header{padding:22px 24px 10px;max-width:1240px;margin:0 auto}
+  .kicker{color:var(--accent);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  h1{font-size:26px;line-height:1.2;margin:.25em 0 .3em}
+  header p{color:var(--muted);margin:.2em 0;max-width:900px}
+  main{max-width:1240px;margin:0 auto;padding:8px 24px 30px;display:grid;grid-template-columns:1fr 1.05fr;gap:20px}
+  @media (max-width:920px){ main{grid-template-columns:1fr} }
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .panel h2{font-size:16px;margin:0 0 8px;color:var(--ink)}
+  .row{display:flex;align-items:center;gap:10px;margin:6px 0}
+  .rowlab{width:92px;flex:none;font-weight:700;font-size:14px}
+  .rowlab small{display:block;font-weight:400;color:var(--muted)}
+  .thumbs{display:flex;flex-wrap:wrap;gap:6px}
+  .th{display:flex;flex-direction:column;align-items:center;font-size:11px}
+  .th canvas{width:50px;height:50px;image-rendering:pixelated;border-radius:6px;border:2px solid transparent;cursor:pointer}
+  .th canvas:hover{border-color:#47618a}
+  .th canvas.sel{border-color:var(--accent)}
+  .th .d{color:var(--gold)} .th .h{color:var(--accent)}
+  .hint{color:var(--muted);font-size:13px;margin:6px 0 4px}
+  .steps{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+  button{font:inherit;font-weight:700;font-size:15px;padding:10px 14px;border-radius:9px;border:1px solid #3d6ea8;background:#1e4f86;color:#fff;cursor:pointer;text-align:left}
+  button:hover:not(:disabled){background:#2862a3}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.ghost{background:transparent;border-color:var(--line);color:var(--muted);font-weight:600;font-size:13px;padding:6px 10px}
+  .slider{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted);margin:-2px 0 4px 4px}
+  .slider input{flex:1;max-width:220px}
+  .slider b{color:var(--ink);min-width:28px;display:inline-block}
+  canvas.chart{width:100%;height:130px;display:block;background:var(--panel2);border-radius:8px}
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+  .tile{background:var(--panel2);border-radius:8px;padding:8px 10px}
+  .tile span{display:block;font-size:12px;color:var(--muted)}
+  .tile b{font-size:24px}
+  .msg{background:#13304f;border-left:4px solid var(--accent);border-radius:6px;padding:10px 12px;font-size:15px;min-height:48px}
+  .msg.err{background:#4a1d1d;border-left-color:var(--bad)}
+  canvas.net{width:100%;height:440px;display:block;background:var(--panel2);border-radius:8px}
+  .out{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:12px;margin-top:10px;font-size:14px}
+  .bar{height:10px;background:#0c1320;border-radius:5px;overflow:hidden;margin-top:3px}
+  .bar i{display:block;height:100%}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:8px}
+  .legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:5px}
+  section.questions{max-width:1240px;margin:0 auto;padding:0 24px 30px}
+  section.questions ol{margin:.4em 0 0;padding-left:1.3em}
+  section.questions li{margin:.45em 0}
+  footer{max-width:1240px;margin:0 auto;padding:0 24px 30px;color:#6f8096;font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+</style>
+
+<!-- TensorFlow.js: use the copy stored next to this page first (works on networks that block CDNs), then two CDNs -->
+<script src="tf.min.js"></script>
+<script>window.tf||document.write('<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"><\/script>')</script>
+<script>window.tf||document.write('<script src="https://unpkg.com/@tensorflow/tfjs@4.22.0/dist/tf.min.js"><\/script>')</script>
+</head>
+<body>
+
+<header>
+  <div class="kicker">ARIN 320 · Unit 6 · Simulation</div>
+  <h1>Train a neural network on lab photos. Then send it to a clinic.</h1>
+  <p>This is a real neural network. Your browser builds it with TensorFlow.js and trains it right here. Nothing is sent anywhere and you need no account.</p>
+  <p>The photos are tiny made-up eye scans, 12 by 12 pixels. <b style="color:var(--gold)">Bright gold spots mean disease.</b> Lab photos are bright and sharp. Clinic photos are dim and blurry, like photos taken with an older camera in a busy clinic.</p>
+</header>
+
+<main>
+  <!-- LEFT: data, controls, results -->
+  <div class="panel">
+    <h2>The photos</h2>
+    <div class="row"><div class="rowlab">Lab<small>bright, sharp</small></div><div class="thumbs" id="labThumbs"></div></div>
+    <div class="row"><div class="rowlab">Clinic<small>dim, blurry</small></div><div class="thumbs" id="clinThumbs"></div></div>
+    <p class="hint">Select any photo to send it through the network and see its answer.</p>
+
+    <h2 style="margin-top:14px">What you do</h2>
+    <div class="steps">
+      <button id="bTrain" disabled>1 · Train on 400 lab photos</button>
+      <button id="bTest" disabled>2 · Test on new lab photos and clinic photos</button>
+      <button id="bFix" disabled>3 · Retrain with clinic photos added</button>
+      <div class="slider">Clinic photos to add in step 3: <input type="range" id="nClin" min="0" max="200" step="10" value="80"><b id="nClinV">80</b></div>
+    </div>
+
+    <canvas class="chart" id="chart"></canvas>
+    <div class="tiles">
+      <div class="tile"><span>Lab accuracy</span><b id="accLab">–</b></div>
+      <div class="tile"><span>Clinic accuracy</span><b id="accClin">–</b></div>
+      <div class="tile"><span>Sick clinic eyes caught</span><b id="recClin">–</b></div>
+    </div>
+    <div class="msg" id="msg">Loading TensorFlow.js…</div>
+  </div>
+
+  <!-- RIGHT: the network -->
+  <div class="panel">
+    <h2>Inside the network</h2>
+    <canvas class="net" id="net"></canvas>
+    <div class="legend">
+      <span><i style="background:#6fb8ff"></i>Connection that pushes toward its target</span>
+      <span><i style="background:#ff7a6b"></i>Connection that pushes against it</span>
+      <span>Brighter hidden neuron = more active</span>
+    </div>
+    <div class="out" id="out"></div>
+  </div>
+</main>
+
+<section class="questions">
+  <div class="panel">
+    <h2>Answer these for the discussion</h2>
+    <ol>
+      <li>After step 2, write down the lab accuracy and the clinic accuracy. How big is the gap?</li>
+      <li>Select a clinic photo marked <b style="color:var(--gold)">Disease</b>. What does the network say? Based on what you see, what did the network learn to look for, and why does that fail in the clinic?</li>
+      <li>Run step 3 with 0, 20, 80, and 200 clinic photos. Record the clinic accuracy each time. About how many local photos did the clinic need?</li>
+      <li>Look at <b>Sick clinic eyes caught</b> after step 2. In a real clinic, what happens to the patients the network misses?</li>
+      <li>Google Health's eye screening tool scored well in the lab and struggled in clinics in Thailand. Which part of this simulation matches that story, and what should a clinic test before it trusts a tool like this?</li>
+    </ol>
+  </div>
+</section>
+
+<footer>
+  <span id="status">Engine: loading</span>
+  <button class="ghost" id="bReset">Start over</button>
+</footer>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const msg=(t,err)=>{ const m=$('#msg'); m.innerHTML=t; m.classList.toggle('err',!!err); };
+
+/* ---------- seeded random numbers so every student sees the same photos ---------- */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- make one 12x12 eye photo ---------- */
+function eyeImg(r,clinic,sick){
+  const a=new Float32Array(144);
+  const vessels=[0,1,2].map(()=>{ const th=r()*Math.PI, cx=5.5+(r()-.5)*2, cy=5.5+(r()-.5)*2; return [Math.cos(th),Math.sin(th),cx,cy]; });
+  const spots=[];
+  if(sick){ const n=2+Math.floor(r()*2); for(let k=0;k<n;k++){ const ang=r()*6.283, rad=1+r()*3; spots.push([5.5+Math.cos(ang)*rad,5.5+Math.sin(ang)*rad]); } }
+  else if(r()<.35){ const ang=r()*6.283, rad=1+r()*3; spots.push([5.5+Math.cos(ang)*rad,5.5+Math.sin(ang)*rad,1]); } // harmless faint spot
+  for(let y=0;y<12;y++) for(let x=0;x<12;x++){
+    const d=Math.hypot(x-5.5,y-5.5); let v=d<5.6?.55:.04;
+    if(d<5.6) vessels.forEach(([ux,uy,cx,cy])=>{ if(Math.abs((x-cx)*uy-(y-cy)*ux)<.55) v-=.22; });
+    spots.forEach(s=>{ if(Math.hypot(x-s[0],y-s[1])<1.05) v+=s[2]?.15:.45; });
+    a[y*12+x]=v;
+  }
+  let b=a;
+  if(clinic){ // dim and blur the photo, add camera noise
+    b=new Float32Array(144);
+    for(let y=0;y<12;y++) for(let x=0;x<12;x++){ let s=0,n=0;
+      for(let dy=-1;dy<=1;dy++) for(let dx=-1;dx<=1;dx++){ const X=x+dx,Y=y+dy; if(X>=0&&X<12&&Y>=0&&Y<12){ s+=a[Y*12+X]; n++; } }
+      b[y*12+x]=(s/n)*.5+.04+(r()-.5)*.16; }
+  } else for(let i=0;i<144;i++) b[i]+=(r()-.5)*.06;
+  for(let i=0;i<144;i++) b[i]=Math.max(0,Math.min(1,b[i]));
+  return b;
+}
+function eyeCol(v){
+  if(v>.78){ const t=Math.min(1,(v-.78)/.22); return [Math.round(235+20*t),Math.round(170+70*t),Math.round(60+60*t)]; }
+  return [Math.round(20+215*v/.78),Math.round(8+120*v/.78),Math.round(6+40*v/.78)];
+}
+function drawEye(cv,img){
+  cv.width=12; cv.height=12; const x=cv.getContext('2d'), id=x.createImageData(12,12);
+  for(let i=0;i<144;i++){ const [R,G,B]=eyeCol(img[i]); id.data.set([R,G,B,255],i*4); }
+  x.putImageData(id,0,0);
+}
+/* plain arrays, so no tensors are left in memory */
+function makeData(n,clinic,seed){ const r=rng(seed), xs=[], ys=[];
+  for(let i=0;i<n;i++){ const y=i%2; xs.push(eyeImg(r,clinic,y===1)); ys.push(y); } return {xs,ys}; }
+function joinData(a,b){ return {xs:a.xs.concat(b.xs), ys:a.ys.concat(b.ys)}; }
+
+/* ---------- sample photos ---------- */
+const r0=rng(2026), sampLab=[], sampClin=[];
+for(let i=0;i<6;i++){ sampLab.push({x:eyeImg(r0,false,i%2===0),y:i%2===0?1:0}); sampClin.push({x:eyeImg(r0,true,i%2===0),y:i%2===0?1:0}); }
+let current=sampLab[0];
+function mkThumbs(box,arr){
+  box.innerHTML='';
+  [...arr].sort((a,b)=>a.y-b.y).forEach(s=>{
+    const w=document.createElement('div'); w.className='th';
+    const c=document.createElement('canvas'); drawEye(c,s.x); c.title=s.y?'Disease':'Healthy';
+    c.onclick=()=>{ $$('.th canvas').forEach(z=>z.classList.remove('sel')); c.classList.add('sel'); current=s; feed(s); };
+    w.appendChild(c); w.insertAdjacentHTML('beforeend',`<span class="${s.y?'d':'h'}">${s.y?'Disease':'Healthy'}</span>`);
+    box.appendChild(w);
+  });
+}
+mkThumbs($('#labThumbs'),sampLab); mkThumbs($('#clinThumbs'),sampClin);
+$('#labThumbs canvas').classList.add('sel');
+
+/* ---------- canvas helper ---------- */
+function setup(cv){ const dpr=Math.min(2.5,window.devicePixelRatio||1), w=cv.clientWidth, h=cv.clientHeight;
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); const x=cv.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); return {x,w,h}; }
+
+/* ---------- state ---------- */
+let model=null, W1=null, b1=null, W2=null, b2=null, hist=[], busy=false, retrained=false;
+
+/* Forward pass in plain JavaScript using the trained weights. Fast, and no GPU needed. */
+function forward(x){
+  if(!W1) return {h:new Array(16).fill(0),p:[.5,.5]};
+  const h=new Array(16);
+  for(let j=0;j<16;j++){ let s=b1[j]; for(let i=0;i<144;i++) s+=x[i]*W1[i][j]; h[j]=Math.max(0,s); }
+  const z=[0,1].map(k=>{ let s=b2[k]; for(let j=0;j<16;j++) s+=h[j]*W2[j][k]; return s; });
+  const m=Math.max(z[0],z[1]), e=z.map(v=>Math.exp(v-m)), t=e[0]+e[1];
+  return {h,p:[e[0]/t,e[1]/t]};
+}
+function grabWeights(){
+  W1=model.layers[0].getWeights()[0].arraySync(); b1=model.layers[0].getWeights()[1].arraySync();
+  W2=model.layers[1].getWeights()[0].arraySync(); b2=model.layers[1].getWeights()[1].arraySync();
+}
+
+/* ---------- drawing: training chart ---------- */
+function drawChart(){
+  const {x,w,h}=setup($('#chart')); const L=36,R=w-10,T=12,B=h-22;
+  x.clearRect(0,0,w,h);
+  x.strokeStyle='rgba(255,255,255,.15)'; x.lineWidth=1;
+  [.5,.75,1].forEach(v=>{ const Y=B-(v-.4)/.6*(B-T); x.beginPath(); x.moveTo(L,Y); x.lineTo(R,Y); x.stroke(); });
+  x.fillStyle='#9fb0c3'; x.font='12px system-ui,sans-serif';
+  x.fillText('100%',4,T+4); x.fillText('75%',8,B-(.35/.6)*(B-T)+4); x.fillText('50%',8,B-(.1/.6)*(B-T)+4);
+  x.fillText('Training accuracy after each round (epoch)',L,h-5);
+  if(!hist.length) return;
+  const n=Math.max(hist.length,15);
+  x.strokeStyle='#5fb6ff'; x.lineWidth=3; x.beginPath();
+  hist.forEach((a,i)=>{ const X=L+(i+1)*(R-L)/n, Y=B-(Math.max(.4,a)-.4)/.6*(B-T); i?x.lineTo(X,Y):x.moveTo(X,Y); });
+  x.stroke();
+}
+
+/* ---------- drawing: the network ---------- */
+function drawNet(s){
+  const {x,w,h}=setup($('#net')); x.clearRect(0,0,w,h);
+  const px=Math.min(16,(h-80)/12,(w*0.42)/12), gx=14, gy=(h-px*12)/2;           // input grid
+  const hx=w*0.55, ox=w-70;                                            // hidden and output columns
+  const hy=j=>36+j*(h-72)/15, oy=k=>h/2+(k?60:-60);
+  const inPos=i=>[gx+(i%12+.5)*px, gy+(Math.floor(i/12)+.5)*px];
+  const {h:act,p}=forward(s.x);
+
+  // connections
+  if(W1){
+    let mx1=0,mx2=0; W1.forEach(r=>r.forEach(v=>mx1=Math.max(mx1,Math.abs(v)))); W2.forEach(r=>r.forEach(v=>mx2=Math.max(mx2,Math.abs(v))));
+    x.lineWidth=1;
+    for(let i=0;i<144;i++) for(let j=0;j<16;j++){ const v=W1[i][j], k=Math.abs(v)/mx1; if(k<.35) continue;
+      const [a,b]=inPos(i); x.strokeStyle=v>0?`rgba(111,184,255,${.08+.35*k})`:`rgba(255,122,107,${.08+.35*k})`;
+      x.beginPath(); x.moveTo(a,b); x.lineTo(hx,hy(j)); x.stroke(); }
+    for(let j=0;j<16;j++) for(let k=0;k<2;k++){ const v=W2[j][k], q=Math.abs(v)/mx2;
+      x.lineWidth=1+3*q; x.strokeStyle=v>0?`rgba(111,184,255,${.15+.6*q})`:`rgba(255,122,107,${.15+.6*q})`;
+      x.beginPath(); x.moveTo(hx,hy(j)); x.lineTo(ox,oy(k)); x.stroke(); }
+  }
+  // input pixels
+  for(let i=0;i<144;i++){ const [R,G,B]=eyeCol(s.x[i]); const [a,b]=inPos(i); x.fillStyle=`rgb(${R},${G},${B})`; x.fillRect(a-px/2+.5,b-px/2+.5,px-1,px-1); }
+  // hidden neurons
+  const amx=Math.max(...act,.001);
+  for(let j=0;j<16;j++){ const k=act[j]/amx;
+    x.fillStyle=`rgb(${Math.round(44+211*k)},${Math.round(58+150*k)},${Math.round(85+30*k)})`;
+    x.beginPath(); x.arc(hx,hy(j),9+3*k,0,6.283); x.fill(); }
+  // outputs
+  ['Healthy','Disease'].forEach((n,k)=>{ const q=p[k], rad=18+14*q;
+    x.fillStyle=k?`rgba(255,190,85,${.25+.75*q})`:`rgba(95,182,255,${.25+.75*q})`;
+    x.beginPath(); x.arc(ox,oy(k),rad,0,6.283); x.fill();
+    x.fillStyle='#e8eef7'; x.font='bold 13px system-ui,sans-serif'; x.textAlign='center';
+    x.fillText(n,ox,oy(k)+(k?rad+16:-rad-8)); x.fillText(Math.round(q*100)+'%',ox,oy(k)+5); });
+  // labels
+  x.textAlign='left'; x.fillStyle='#9fb0c3'; x.font='12px system-ui,sans-serif';
+  x.fillText('Input: 144 pixels',gx,gy-10); x.textAlign='center'; x.fillText('Hidden layer: 16 neurons',hx,18); x.textAlign='left';
+  return p;
+}
+
+/* ---------- answer panel ---------- */
+function feed(s){
+  const p=drawNet(s);
+  const trained=!!W1, right=trained?((p[1]>.5?1:0)===s.y):null;
+  $('#out').innerHTML=
+    `<div>Healthy <b>${Math.round(p[0]*100)}%</b><div class="bar"><i style="width:${p[0]*100}%;background:#5fb6ff"></i></div></div>`+
+    `<div>Disease <b>${Math.round(p[1]*100)}%</b><div class="bar"><i style="width:${p[1]*100}%;background:#ffbe55"></i></div></div>`+
+    `<div>Truth: <b>${s.y?'Disease':'Healthy'}</b><br>${right===null?'<span style="color:#9fb0c3">Not trained yet</span>':right?'<b style="color:#5ad08f">Network is right</b>':'<b style="color:#ff7a6b">Network is wrong</b>'}</div>`;
+}
+
+/* ---------- training and testing ---------- */
+function build(){
+  const m=tf.sequential();
+  m.add(tf.layers.dense({inputShape:[144],units:16,activation:'relu'}));
+  m.add(tf.layers.dense({units:2,activation:'softmax'}));
+  m.compile({optimizer:tf.train.adam(0.006),loss:'categoricalCrossentropy',metrics:['accuracy']});
+  return m;
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function setButtons(){ $('#bTrain').disabled=busy; $('#bTest').disabled=busy||!W1; $('#bFix').disabled=busy||!W1; $('#nClin').disabled=busy; }
+
+async function train(nClinic){
+  busy=true; setButtons(); hist=[]; drawChart();
+  let d=makeData(400,false,11);
+  if(nClinic>0) d=joinData(d,makeData(nClinic,true,12));
+  const xs=tf.tensor2d(d.xs.map(a=>Array.from(a))), ys=tf.oneHot(tf.tensor1d(d.ys,'int32'),2).toFloat();
+  msg(nClinic>0?`Retraining from scratch on 400 lab photos plus ${nClinic} clinic photos…`
+       :nClinic===0&&retrained?'Retraining from scratch on 400 lab photos and no clinic photos…'
+       :'Training on 400 lab photos… Each round, the network adjusts its 2,354 weights to make fewer mistakes.');
+  try{
+    for(let attempt=0;attempt<3;attempt++){
+      if(model) model.dispose(); model=build(); hist=[]; drawChart();
+      await model.fit(xs,ys,{epochs:15,batchSize:32,shuffle:true,callbacks:{onEpochEnd:async(e,l)=>{
+        hist.push(l.acc??l.accuracy); drawChart(); grabWeights(); feed(current); await sleep(90); }}});
+      if(hist[hist.length-1]>.8) break;   // rare bad start: try again
+    }
+    grabWeights(); feed(current);
+    return true;
+  }catch(err){
+    msg('Training stopped with an error: <code>'+(err&&err.message||err)+'</code>. Select <b>Start over</b> or reload the page.',true);
+    console.error(err); return false;
+  }finally{ xs.dispose(); ys.dispose(); busy=false; setButtons(); }
+}
+function score(d){
+  let right=0, sick=0, caught=0;
+  d.xs.forEach((x,i)=>{ const p=forward(x).p, guess=p[1]>.5?1:0; if(guess===d.ys[i]) right++; if(d.ys[i]===1){ sick++; if(guess===1) caught++; } });
+  return {acc:right/d.xs.length, caught, sick};
+}
+function test(){
+  const L=score(makeData(300,false,21)), C=score(makeData(300,true,22));
+  const pct=v=>Math.round(v*100)+'%';
+  $('#accLab').textContent=pct(L.acc); $('#accLab').style.color=L.acc<.75?'var(--bad)':'var(--ok)';
+  $('#accClin').textContent=pct(C.acc); $('#accClin').style.color=C.acc<.75?'var(--bad)':'var(--ok)';
+  $('#recClin').textContent=`${C.caught} of ${C.sick}`; $('#recClin').style.color=C.caught/C.sick<.75?'var(--bad)':'var(--ok)';
+  const a=Math.round(L.acc*100), b=Math.round(C.acc*100);
+  if(!retrained) msg(`<b>Domain shift.</b> ${a} percent right in the lab, ${b} percent in the clinic${b<62?', close to a coin flip':''}. It caught only ${C.caught} of ${C.sick} sick clinic eyes. Select a clinic photo marked Disease and see what the network says. Then try step 3.`);
+  else msg(`With ${$('#nClin').value} clinic photos in training: ${b} percent right in the clinic and ${a} percent in the lab. ${b>=80?'Local data fixed most of the gap. That is the fix called "use local data."':'The clinic score is still low. Try more clinic photos.'}`);
+  feed(current);
+}
+
+$('#bTrain').onclick=async()=>{ retrained=false; if(await train(0)) msg(`Trained. It got ${Math.round(hist[hist.length-1]*100)} percent right on its training photos. Select photos to see how it answers, then select step 2.`); };
+$('#bTest').onclick=test;
+$('#bFix').onclick=async()=>{ retrained=true; if(await train(+$('#nClin').value)) test(); };
+$('#nClin').oninput=e=>$('#nClinV').textContent=e.target.value;
+$('#bReset').onclick=()=>{ if(busy) return; if(model){ model.dispose(); model=null; } W1=b1=W2=b2=null; hist=[]; retrained=false;
+  ['#accLab','#accClin','#recClin'].forEach(id=>{ $(id).textContent='–'; $(id).style.color=''; });
+  drawChart(); feed(current); setButtons(); msg('Select step 1. The network starts knowing nothing.'); };
+window.addEventListener('resize',()=>{ drawChart(); feed(current); });
+
+/* ---------- start ---------- */
+drawChart(); feed(current);
+if(!window.tf){
+  msg('TensorFlow.js did not load. Check your internet connection and reload. On a work network, try a phone or home connection.',true);
+  $('#status').textContent='Engine: TensorFlow.js not loaded';
+}else{
+  // The CPU engine is the most reliable choice for a network this small. It needs no graphics card.
+  tf.setBackend('cpu').then(()=>tf.ready()).then(()=>{
+    $('#status').textContent=`Engine: TensorFlow.js ${tf.version.tfjs}, ${tf.getBackend()} backend`;
+    setButtons(); msg('Select step 1. The network starts knowing nothing.');
+  }).catch(err=>{ msg('TensorFlow.js could not start: <code>'+err.message+'</code>',true); });
+}
+})();
+</script>
+</body>
+</html>

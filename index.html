@@ -472,7 +472,7 @@
   <div class="kicker">Learning objectives</div>
   <h2>By the end of tonight, you can do four things.</h2>
   <ol class="pts">
-    <li><span class="claim">Explain why a model that scores well in testing can fail in real use.</span><span class="detail">Part 1: five cases from four fields.</span></li>
+    <li><span class="claim">Explain why a model that scores well in testing can fail in real use.</span><span class="detail">Part 1: five cases from four domains.</span></li>
     <li><span class="claim">Name what changes when a tool moves to a new place.</span><span class="detail">Part 2, sections 1 to 3: domain shift, why projects fail, domain knowledge.</span></li>
     <li><span class="claim">Run the Fit Check on any AI system.</span><span class="detail">Part 2, section 4: five questions about data, users, workflow, stakes, and rules.</span></li>
     <li><span class="claim">Recommend adopt, adapt, or stop, and say why.</span><span class="detail">Part 2, sections 5 to 7, then your capstone.</span></li>
@@ -485,7 +485,7 @@
   <h2>Two parts, twelve sections, one question.</h2>
   <div class="outline">
     <div class="ocol">
-      <div class="ohead">Part 1 · Four Fields, Five Cases</div>
+      <div class="ohead">Part 1 · Four Domains, Five Cases</div>
       <div class="oitem" data-go="c1"><span class="n" style="background:#1565c0">1</span><div><b>Eye screening in Thailand</b><small>Healthcare · lab test, pilot, deployment, accuracy</small></div></div>
       <div class="oitem" data-go="c2"><span class="n" style="background:#d03b2f">2</span><div><b>The sepsis alert</b><small>Healthcare · false alarms, misses, alert fatigue</small></div></div>
       <div class="oitem" data-go="c3"><span class="n" style="background:#c46a00">3</span><div><b>Zillow Offers</b><small>Finance · stakes</small></div></div>
@@ -493,13 +493,13 @@
       <div class="oitem" data-go="c5"><span class="n" style="background:#0e8f86">5</span><div><b>Pounce at Georgia State</b><small>Education · built for its domain</small></div></div>
     </div>
     <div class="ocol">
-      <div class="ohead">Part 2 · Fitting a Solution to a Field</div>
+      <div class="ohead">Part 2 · Fitting a Solution to Its Domain</div>
       <div class="oitem" data-go="p1"><span class="n" style="background:#6a3fc7">1</span><div><b>Domain shift and shortcuts</b><small>Train a real neural network</small></div></div>
       <div class="oitem" data-go="p2"><span class="n" style="background:#4338ca">2</span><div><b>Why AI projects fail</b><small>RAND's five root causes</small></div></div>
-      <div class="oitem" data-go="p3"><span class="n" style="background:#a21caf">3</span><div><b>Domain knowledge</b><small>What the field's experts supply</small></div></div>
+      <div class="oitem" data-go="p3"><span class="n" style="background:#a21caf">3</span><div><b>Domain knowledge</b><small>What the domain's experts supply</small></div></div>
       <div class="oitem" data-go="p4"><span class="n" style="background:#3d5a80">4</span><div><b>The Fit Check</b><small>Five questions before a tool moves</small></div></div>
       <div class="oitem" data-go="p5"><span class="n" style="background:#0369a1">5</span><div><b>Five ways to adapt a tool</b><small>And when to stop</small></div></div>
-      <div class="oitem" data-go="p6"><span class="n" style="background:#9a3412">6</span><div><b>Five strategies that carry across fields</b><small>What every success had</small></div></div>
+      <div class="oitem" data-go="p6"><span class="n" style="background:#9a3412">6</span><div><b>Five strategies that carry across domains</b><small>What every success had</small></div></div>
       <div class="oitem" data-go="p7"><span class="n" style="background:#15803d">7</span><div><b>Two cases that worked</b><small>Mayo Clinic and BMW</small></div></div>
     </div>
   </div>
@@ -518,11 +518,11 @@
 </section>
 
 <!-- ============================== PART 1 ============================== -->
-<section class="dark title" data-sec="0" data-part="Part 1" data-secname="Four Fields, Five Cases" data-ask="part1">
+<section class="dark title" data-sec="0" data-part="Part 1" data-secname="Four Domains, Five Cases" data-ask="part1">
   <div class="bg3d" data-net="wheel" data-ids="c1,c2,c3,c4,c5" data-c1="Part 1" data-c2="5 cases"></div>
   <div class="tleft">
     <div class="kicker">Part 1</div>
-    <h1>Four Fields, Five Cases</h1>
+    <h1>Four Domains, Five Cases</h1>
     <p class="lead">Each case shows a different way a working model can fail, or succeed, once it meets real people.</p>
     <div class="chips"><span class="chip3" style="--c:#1565c0">Healthcare × 2</span><span class="chip3" style="--c:#c46a00">Finance</span><span class="chip3" style="--c:#1f8a55">Defense</span><span class="chip3" style="--c:#0e8f86">Education</span></div>
   </div>
@@ -1078,7 +1078,7 @@
   <div class="kicker">Part 1 · Summary</div>
   <h2>Five cases, sorted.</h2>
   <table class="t sorttable">
-    <tr><th>Case</th><th>Field</th><th>Main cause</th><th>The lesson</th></tr>
+    <tr><th>Case</th><th>Domain</th><th>Main cause</th><th>The lesson</th></tr>
     <tr class="fragment"><td><b style="color:#1565c0">Eye screening</b></td><td>Healthcare</td><td><b class="tag-d">Data</b></td><td>A lab score hides the people a system turned away.</td></tr>
     <tr class="fragment"><td><b style="color:#d03b2f">Sepsis alert</b></td><td>Healthcare</td><td><b class="tag-d">Data</b></td><td>Test on your own patients. Mostly-wrong alerts make people stop looking.</td></tr>
     <tr class="fragment"><td><b style="color:#c46a00">Zillow Offers</b></td><td>Finance</td><td><b class="tag-t">Technology</b></td><td>Higher stakes demand more from the same model.</td></tr>
@@ -1089,11 +1089,11 @@
 </section>
 
 <!-- ============================== PART 2 ============================== -->
-<section id="part2" class="dark title" data-sec="0" data-part="Part 2" data-secname="Fitting a Solution to a Field" data-ask="part2">
+<section id="part2" class="dark title" data-sec="0" data-part="Part 2" data-secname="Fitting a Solution to Its Domain" data-ask="part2">
   <div class="bg3d" data-net="part"></div>
   <div class="tleft">
     <div class="kicker">Part 2</div>
-    <h1>Fitting a Solution to a Field</h1>
+    <h1>Fitting a Solution to Its Domain</h1>
     <p class="lead">Part 1 showed what happened. Part 2 explains why, in seven ideas, and ends with a method you can use on any AI system.</p>
   </div>
 </section>
@@ -1250,14 +1250,14 @@
   <div class="tleft">
     <div class="kicker">Part 2 · Section 3</div>
     <h1>Domain knowledge belongs in the design</h1>
-    <div class="learn"><b>You will learn</b><ul><li>The five things a field's experts know that builders cannot guess</li><li>Why that knowledge has to arrive before the tool does</li></ul></div>
+    <div class="learn"><b>You will learn</b><ul><li>The five things a domain's experts know that builders cannot guess</li><li>Why that knowledge has to arrive before the tool does</li></ul></div>
   </div>
 </section>
 
 <section data-deck="study" data-sec="9" class="defslide">
   <div class="kicker">Key term · Section 3</div>
   <h2>Every case that went wrong was missing something only insiders knew.</h2>
-  <div class="def3 big fragment"><div class="term">Domain knowledge</div><div class="means">What people who work in a field know that outsiders don't: what words mean, which data to trust, and how the work really gets done.</div></div>
+  <div class="def3 big fragment"><div class="term">Domain knowledge</div><div class="means">A domain is an area of work or study: the profession you are training for, such as healthcare, logistics, or cybersecurity. Domain knowledge is what people who work in a domain know that outsiders don't: what words mean, which data to trust, and how the work really gets done.</div></div>
   <table class="t fragment" style="margin-top:.5em">
     <tr><th style="width:24%">The expert supplies</th><th>Why builders can't guess it</th><th style="width:30%">Where you saw it</th></tr>
     <tr><td><b>What the words mean</b></td><td>The same label is recorded differently from place to place.</td><td>Sepsis: two definitions, two scores</td></tr>
@@ -1275,7 +1275,7 @@
   <div class="mcq" data-ans="2" data-why="A training NCO would know deployments and field exercises change deadlines, which status fields update late, and who may act. The scenario is invented.">
     <p class="q">1. A team builds a model to predict which soldiers will miss a training deadline. Nobody on the team has served. Who could have told them what they'd get wrong?</p>
     <div class="opts"><button>A data scientist from another company</button><button>The software vendor</button><button>A training NCO</button><button>A GenAI chatbot</button></div><div class="why"></div></div>
-  <div class="mcq" data-ans="1" data-why="Counselors wrote the first answers and handled what the tool couldn't, so the field's knowledge was built in from day one.">
+  <div class="mcq" data-ans="1" data-why="Counselors wrote the first answers and handled what the tool couldn't, so the domain's knowledge was built in from day one.">
     <p class="q">2. How did Pounce build domain knowledge in?</p>
     <div class="opts"><button>It used a bigger model</button><button>Counselors wrote its answers and handled hard questions</button><button>It searched the internet</button><button>It skipped testing</button></div><div class="why"></div></div>
 </section>
@@ -1355,22 +1355,22 @@
   <div class="bg3d" data-net="sec"></div>
   <div class="tleft">
     <div class="kicker">Part 2 · Section 6</div>
-    <h1>Five strategies that carry across fields</h1>
+    <h1>Five strategies that carry across domains</h1>
     <div class="learn"><b>You will learn</b><ul><li>The five habits every success in this unit shared</li><li>How to build them into your capstone plan</li></ul></div>
   </div>
 </section>
 
 <section data-deck="study" data-sec="11">
   <div class="kicker">Section 6</div>
-  <h2>What carries from one field to the next.</h2>
+  <h2>What carries from one domain to the next.</h2>
   <ol class="pts" style="display:grid;grid-template-columns:1fr 1fr;gap:0 1.2em">
     <li class="fragment fade-in-then-semi-out"><span class="claim">Phase it in.</span><span class="detail">Pilot first, measure, then widen. Mayo ran a trial before routine use.</span></li>
     <li class="fragment fade-in-then-semi-out"><span class="claim">Keep people in the loop.</span><span class="detail">The tool recommends; a person decides. Pounce's counselors.</span></li>
     <li class="fragment fade-in-then-semi-out"><span class="claim">Build a feedback loop.</span><span class="detail">Every correction makes the tool better. Pounce grew from 250 to 1,000+ answers.</span></li>
     <li class="fragment fade-in-then-semi-out"><span class="claim">Make it explainable.</span><span class="detail">Users must see why it flagged something, or they ignore it. The sepsis alert.</span></li>
-    <li class="fragment"><span class="claim">Mix the team.</span><span class="detail">Builders plus people from the field. BMW's line workers labeled the photos.</span></li>
+    <li class="fragment"><span class="claim">Mix the team.</span><span class="detail">Builders plus people who work in the domain. BMW's line workers labeled the photos.</span></li>
   </ol>
-  <p class="point fragment">What carries across fields: the technique and the method. What has to be redone in every field: the data, the cutoff, the workflow, and the rules.</p>
+  <p class="point fragment">What carries across domains: the technique and the method. What has to be redone in every domain: the data, the cutoff, the workflow, and the rules.</p>
 </section>
 
 <!-- ---------------- P2 S7 ---------------- -->
@@ -1413,7 +1413,7 @@
   <div class="mcq" data-ans="0" data-why="Only one group of clinicians saw the AI result, so Mayo could measure what the tool changed in everyday care. That is phasing it in with a test in real use.">
     <p class="q">1. Mayo randomly split clinicians and showed the AI result to only one group. Which strategy is that?</p>
     <div class="opts"><button>Phase it in and test in real use</button><button>Make it explainable</button><button>Move the cutoff</button><button>Stop</button></div><div class="why"></div></div>
-  <div class="mcq" data-ans="3" data-why="BMW's own workers photographed parts and marked defects. The field's knowledge went straight into the training data.">
+  <div class="mcq" data-ans="3" data-why="BMW's own workers photographed parts and marked defects. The domain's knowledge went straight into the training data.">
     <p class="q">2. Why did BMW's system learn to tell dust from cracks?</p>
     <div class="opts"><button>It used a bigger model</button><button>It bought data online</button><button>It ran in the cloud</button><button>Workers labeled about 100 real photos of each, including dust and oil</button></div><div class="why"></div></div>
 </section>
@@ -2258,7 +2258,7 @@ async function askGenAI(prompt,out){ if(!SAMPLE){ out.innerHTML=`<span>GenAI ope
   if(window.Reveal&&Reveal.isReady()) Reveal.layout(); }
 const ASK={
  intro:["What does 'domain-specific AI' mean, in plain words?","Give three examples of an AI system that worked in testing but failed in real use.","How does tonight's topic connect to a student's capstone project?"],
- part1:["Why do AI systems that work in testing often fail in real use?","What are the four fields in tonight's cases, and why do they differ?","Explain a pilot in plain words."],
+ part1:["Why do AI systems that work in testing often fail in real use?","What are the four domains in tonight's cases, and why do they differ?","Explain a pilot in plain words."],
  c1:["Explain lab test, pilot, and deployment with an example from aircraft maintenance.","Why is accuracy not enough to judge a medical AI?","What is the difference between accuracy and answer rate?"],
  c2:["Explain false alarm vs. miss with a cybersecurity example.","What is alert fatigue, and how do organizations reduce it?","What is sensitivity, in plain words?"],
  c3:["What does 'stakes' mean for an AI system? Give two examples.","Explain the winner's curse in simple terms.","When should a company stop using an AI model?"],
@@ -2268,10 +2268,10 @@ const ASK={
  p1:["Explain domain shift with an example from aircraft maintenance.","What is a shortcut in machine learning? Give an example.","What are the four ways a domain can differ?"],
  nn:["How does a neural network learn from examples?","Why would a model trained on bright photos fail on dim ones?","What does a hidden layer in a neural network do?"],
  p2:["Explain RAND's five root causes of AI project failure in plain words.","Which root cause is most common, and why?","How can a team avoid 'technology comes first'?"],
- p3:["What is domain knowledge, and why do AI teams need it?","Who should be on the team for an AI system in a hospital?","What questions should a builder ask a field expert?"],
+ p3:["What is domain knowledge, and why do AI teams need it?","Who should be on the team for an AI system in a hospital?","What questions should a builder ask a domain expert?"],
  p4:["Walk me through the Fit Check for a GenAI chatbot at a military housing office.","How do stakes change how much testing a system needs?","When is a problem not a job for AI?"],
  p5:["Give an example of each of the five ways to adapt an AI tool.","How do I adapt a GenAI tool to my organization?","When is stopping the right answer?"],
- p6:["Explain the five cross-field strategies with examples.","What is a feedback loop in an AI system?","Why does explainability matter to the people who use an AI tool?"],
+ p6:["Explain the five cross-domain strategies with examples.","What is a feedback loop in an AI system?","Why does explainability matter to the people who use an AI tool?"],
  p7:["How did Mayo Clinic test its AI-ECG tool in real use?","How did BMW use its own workers to train its AI inspection?","What did the Mayo and BMW projects have in common?"],
  capstone:["How do I find a possible shortcut in my capstone AI system?","What test result should make me recommend stopping an AI system?","Which Fit Check question do students usually find hardest, and why?"]};
 document.body.insertAdjacentHTML('beforeend',`<aside id="askP" aria-label="Ask GenAI"><header><h3>✦ Ask GenAI</h3><p id="askCtx"></p></header>
